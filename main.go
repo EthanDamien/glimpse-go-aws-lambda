@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
 )
@@ -34,17 +37,17 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 
 	switch req.Event {
 	case "createUser":
-		var dest CreateUserRequest
+		var dest user.CreateUserRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
-		return CreateUser(ctx, reqID, dest)
+		return user.CreateUser(ctx, reqID, dest)
 	case "createAdmin":
-		var dest CreateAdminRequest
+		var dest admin.CreateAdminRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
-		return CreateAdmin(ctx, reqID, dest)
+		return admin.CreateAdmin(ctx, reqID, dest)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
