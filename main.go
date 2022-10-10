@@ -2,14 +2,17 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
+	"go.uber.org/zap"
 )
 
 type HandleResponse struct {
@@ -20,6 +23,30 @@ type HandleResponse struct {
 type HandleRequest struct {
 	Event string          `json:"event"`
 	Body  json.RawMessage `json:"body"`
+}
+
+var logger *zap.Logger
+var db *sql.DB
+
+func initDatabaseConnection() {
+	l, _ := zap.NewProduction()
+	logger = l
+	logger.Info("Getting DB connection")
+
+	dbConnection, err := database.GetConnection()
+	if err != nil {
+		logger.Error("error connecting to database", zap.Error(err))
+		panic(err)
+	}
+
+	logger.Info("Pinging Database")
+	err = dbConnection.Ping()
+	if err != nil {
+		logger.Error("error pinging database", zap.Error(err))
+		panic(err)
+	}
+
+	db = dbConnection
 }
 
 // Handle the calls
@@ -35,9 +62,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 	default:
 	}
 
+	initDatabaseConnection()
+
 	switch req.Event {
 	case "createUser":
 		var dest user.CreateUserRequest
+
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
@@ -47,7 +77,7 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
-		return admin.CreateAdmin(ctx, reqID, dest)
+		return admin.CreateAdmin(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
