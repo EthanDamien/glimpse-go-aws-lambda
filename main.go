@@ -28,6 +28,7 @@ type HandleRequest struct {
 var logger *zap.Logger
 var db *sql.DB
 
+// This function initializes the database connection
 func initDatabaseConnection() {
 	l, _ := zap.NewProduction()
 	logger = l
@@ -46,6 +47,7 @@ func initDatabaseConnection() {
 		panic(err)
 	}
 
+	// Set global var
 	db = dbConnection
 }
 
@@ -62,12 +64,13 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 	default:
 	}
 
+	//Initialize Database
 	initDatabaseConnection()
 
+	//This is the first row in the json request and will do certain things based on this variable
 	switch req.Event {
 	case "createUser":
 		var dest user.CreateUserRequest
-
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}

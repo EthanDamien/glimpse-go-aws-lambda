@@ -21,11 +21,14 @@ type CreateAdminResponse struct {
 	ReqID string `json:"req_id"`
 }
 
-const createAdmin = `
+// Template to be used to insert to Table
+const createAdminTemplate = `
 Insert into Admins (AdminID, Email, Password, Company_Name, AdminPin) 
-values (NULL, "a", "a", "a", "a");`
+values (NULL, "%s", "%s", "%s", "%s");`
 
 func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *sql.DB) (CreateAdminResponse, error) {
+
+	//validate JSON
 	if req.Email == "" {
 		return CreateAdminResponse{DESC: "CreateAdmin err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("missing Email")
 	}
@@ -39,8 +42,12 @@ func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *
 		return CreateAdminResponse{DESC: "CreateAdmin err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing AdminPIN")
 	}
 
-	db.Ping()
-	_, err := db.ExecContext(ctx, createAdmin)
+	//Use the template and fill in the blanks
+	var builtQuery = fmt.Sprintf(createAdminTemplate, req.Email, req.Password, req.Company_Name, req.AdminPIN)
+	_, err := db.ExecContext(ctx, builtQuery)
+
+	//If this fails, send "error" response
+	//TODO send actual error to Lambda
 	if err != nil {
 		return CreateAdminResponse{DESC: "Could not insert into Admin Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 	}
