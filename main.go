@@ -9,6 +9,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -88,6 +89,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return admin.CreateAdmin(ctx, reqID, dest, db)
+	case "createShift":
+		var dest shift.CreateShiftRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.CreateShift(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
