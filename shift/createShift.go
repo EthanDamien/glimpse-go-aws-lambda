@@ -30,7 +30,7 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 
 	//validate JSON
 	if req.EmployeeID == 0 {
-		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("missing EmployeeID")
+		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
 	}
 	if req.ClockInTime.IsZero() {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockInTime")
@@ -49,7 +49,7 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 	//If this fails, send "error" response
 	//TODO send actual error to Lambda
 	if err != nil {
-		return CreateShiftResponse{DESC: "Could not insert into Admin Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+		return CreateShiftResponse{DESC: "Could not insert into Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 	}
 	return CreateShiftResponse{DESC: "CreateShift success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
