@@ -32,10 +32,10 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 	if req.EmployeeID == 0 {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("missing EmployeeID")
 	}
-	if req.ClockInTime.String() == "" {
+	if req.ClockInTime.IsZero() {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockInTime")
 	}
-	if req.ClockOutTime.String() == "" {
+	if req.ClockOutTime.IsZero() {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockOutTime")
 	}
 	if req.ClockInTime.After(req.ClockOutTime) {
