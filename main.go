@@ -13,6 +13,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"go.uber.org/zap"
 )
 
@@ -28,6 +29,7 @@ type HandleRequest struct {
 
 var logger *zap.Logger
 var db *sql.DB
+var awsSession *session.Session
 
 // This function initializes the database connection
 func initDatabaseConnection() {
@@ -69,7 +71,8 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 	initDatabaseConnection()
 
 	//Connect to s3
-	s3.ConnectAws()
+	awsSession := s3.ConnectAws()
+	logger.Info(*awsSession.Config.Region)
 
 	//This is the first row in the json request and will do certain things based on this variable
 	switch req.Event {
