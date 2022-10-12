@@ -24,7 +24,7 @@ type CreateShiftResponse struct {
 // Template to be used to insert to Table
 const createShiftTemplate = `
 Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings) 
-values (NULL, "%d", "%s", "%s", "%f");`
+values (NULL, %d, "%s", "%s", %f);`
 
 func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
 
@@ -49,7 +49,7 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 	//If this fails, send "error" response
 	//TODO send actual error to Lambda
 	if err != nil {
-		return CreateShiftResponse{DESC: "Could not insert into Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+		return CreateShiftResponse{DESC: "Could not insert into Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
 	}
 	return CreateShiftResponse{DESC: "CreateShift success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
