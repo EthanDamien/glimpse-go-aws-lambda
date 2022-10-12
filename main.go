@@ -102,7 +102,11 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 		}
 		return admin.GetAdmin(ctx, reqID, dest, db)
 	case "updateShift":
-
+		var dest shift.UpdateShiftRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.UpdateShift(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
