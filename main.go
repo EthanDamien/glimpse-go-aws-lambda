@@ -8,6 +8,7 @@ import (
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -66,6 +67,9 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 
 	//Initialize Database
 	initDatabaseConnection()
+
+	//Connect to s3
+	s3.ConnectAws()
 
 	//This is the first row in the json request and will do certain things based on this variable
 	switch req.Event {
