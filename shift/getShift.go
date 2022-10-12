@@ -21,13 +21,13 @@ type GetShiftRequest struct {
 }
 
 const getAllShiftsTemplate = `
-SELECT * FROM Shift WHERE ClockInTime >= "%s" AND ClockOutTime <= "%s");`
+SELECT * FROM Shift WHERE ClockInTime >= "%s" AND ClockOutTime <= "%s";`
 
 const getEmployeeShiftsTemplate = `
-SELECT * FROM Shift WHERE EmployeeID == "%d");`
+SELECT * FROM Shift WHERE EmployeeID == "%d";`
 
 const getShiftTemplate = `
-SELECT * FROM Shift WHERE ShiftEventID == "%d");`
+SELECT * FROM Shift WHERE ShiftEventID == "%d";`
 
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (sql.Result, error) {
 
