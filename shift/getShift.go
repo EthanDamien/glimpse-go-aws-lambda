@@ -3,7 +3,6 @@ package shift
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -22,10 +21,11 @@ type GetShiftRequest struct {
 }
 
 type GetShiftResponse struct {
-	DESC  string `json:"desc"`
-	OK    bool   `json:"ok"`
-	ID    int64  `json:"id"`
-	ReqID string `json:"req_id"`
+	RES   []Shift `json:"res"`
+	DESC  string  `json:"desc"`
+	OK    bool    `json:"ok"`
+	ID    int64   `json:"id"`
+	ReqID string  `json:"req_id"`
 }
 
 type Shift struct {
@@ -45,98 +45,76 @@ SELECT * FROM Shift WHERE EmployeeID = %d;`
 const getShiftTemplate = `
 SELECT * FROM Shift WHERE ShiftEventID = %d;`
 
-func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (string, error) {
+func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 	//validate JSON
 	if req.FromDate.IsZero() {
-		return "", fmt.Errorf("Missing FromDate")
+		return GetShiftResponse{DESC: "Could not get shifts - missing FromDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing FromDate")
 	}
 	if req.ToDate.IsZero() {
-		return "", fmt.Errorf("Missing ToDate")
+		return GetShiftResponse{DESC: "Could not get shifts - missing ToDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ToDate")
 	}
 
 	//Use the template and fill in the blanks
 	var builtQuery = fmt.Sprintf(getAllShiftsTemplate, req.FromDate, req.ToDate)
-	res, err := getJSON(builtQuery, db)
-	return res, err
-}
-
-func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsRequest, db *sql.DB) (sql.Result, error) {
-
-	//validate JSON
-	if req.EmployeeID == 0 {
-		return nil, fmt.Errorf("Missing EmployeeID")
-	}
-
-	//Use the template and fill in the blanks
-	var builtQuery = fmt.Sprintf(getEmployeeShiftsTemplate, req.EmployeeID)
-	response, err := db.ExecContext(ctx, builtQuery)
-
-	//If this fails, send "error" response
-	//TODO send actual error to Lambda
+	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
-		return nil, err
+		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
 	}
-	return response, nil
+
+	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
 
-func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB) (sql.Result, error) {
+func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
+
+	if req.EmployeeID == 0 {
+		return GetShiftResponse{DESC: "Could not get shifts - missing EmployeeID", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
+	}
+
+	var builtQuery = fmt.Sprintf(getEmployeeShiftsTemplate, req.EmployeeID)
+	res, err := getQueryRes(builtQuery, db)
+
+	if err != nil {
+		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+	}
+	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+}
+
+func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	//validate JSON
 	if req.ShiftEventID == 0 {
-		return nil, fmt.Errorf("Missing ShiftEventID")
+		return GetShiftResponse{DESC: "Could not get shifts - missing ShiftEventID", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ShiftEventID")
 	}
 
 	//Use the template and fill in the blanks
 	var builtQuery = fmt.Sprintf(getShiftTemplate, req.ShiftEventID)
-	response, err := db.ExecContext(ctx, builtQuery)
+	res, err := getQueryRes(builtQuery, db)
 
 	//If this fails, send "error" response
 	//TODO send actual error to Lambda
 	if err != nil {
-		return nil, err
+		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
 	}
-	return response, nil
+	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
 
-func getJSON(builtQuery string, db *sql.DB) (string, error) {
+func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {
 	rows, err := db.Query(builtQuery)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer rows.Close()
-	columns, err := rows.Columns()
-	if err != nil {
-		return "", err
-	}
 
-	count := len(columns)
-	tableData := make([]map[string]interface{}, 0)
-	values := make([]interface{}, count)
-	valuePtrs := make([]interface{}, count)
+	var shifts []Shift
+
 	for rows.Next() {
-		for i := 0; i < count; i++ {
-			valuePtrs[i] = &values[i]
+		var shift Shift
+		if err := rows.Scan(&shift.ShiftEventID, &shift.EmployeeID, &shift.ClockInTime,
+			&shift.ClockOutTime, &shift.Earnings); err != nil {
+			return shifts, err
 		}
-		rows.Scan(valuePtrs...)
-		entry := make(map[string]interface{})
-		for i, col := range columns {
-			var v interface{}
-			val := values[i]
-			b, ok := val.([]byte)
-			if ok {
-				v = string(b)
-			} else {
-				v = val
-			}
-			entry[col] = v
-		}
-		tableData = append(tableData, entry)
+		shifts = append(shifts, shift)
 	}
-	jsonData, err := json.Marshal(tableData)
-	if err != nil {
-		return "", err
-	}
-	fmt.Println(string(jsonData))
-	return string(jsonData), nil
+	return shifts, nil
 }
