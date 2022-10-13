@@ -21,14 +21,12 @@ type CreateShiftResponse struct {
 	ReqID string `json:"req_id"`
 }
 
-// Template to be used to insert to Table
 const createShiftTemplate = `
 Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings) 
 values (NULL, %d, "%s", "%s", %f);`
 
 func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
 
-	//validate JSON
 	if req.EmployeeID == 0 {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
 	}
@@ -42,12 +40,9 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("ClockInTime must be earlier than ClockOutTime")
 	}
 
-	//Use the template and fill in the blanks
 	var builtQuery = fmt.Sprintf(createShiftTemplate, req.EmployeeID, req.ClockInTime, req.ClockOutTime, req.Earnings)
 	_, err := db.ExecContext(ctx, builtQuery)
 
-	//If this fails, send "error" response
-	//TODO send actual error to Lambda
 	if err != nil {
 		return CreateShiftResponse{DESC: "Could not insert into Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
 	}

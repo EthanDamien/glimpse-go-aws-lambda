@@ -46,7 +46,7 @@ const getShiftTemplate = `
 SELECT * FROM Shift WHERE ShiftEventID = %d;`
 
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
-	//validate JSON
+
 	if req.FromDate.IsZero() {
 		return GetShiftResponse{DESC: "Could not get shifts - missing FromDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing FromDate")
 	}
@@ -54,7 +54,6 @@ func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db
 		return GetShiftResponse{DESC: "Could not get shifts - missing ToDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ToDate")
 	}
 
-	//Use the template and fill in the blanks
 	var builtQuery = fmt.Sprintf(getAllShiftsTemplate, req.FromDate, req.ToDate)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
@@ -81,17 +80,13 @@ func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsR
 
 func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB) (GetShiftResponse, error) {
 
-	//validate JSON
 	if req.ShiftEventID == 0 {
 		return GetShiftResponse{DESC: "Could not get shifts - missing ShiftEventID", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ShiftEventID")
 	}
 
-	//Use the template and fill in the blanks
 	var builtQuery = fmt.Sprintf(getShiftTemplate, req.ShiftEventID)
 	res, err := getQueryRes(builtQuery, db)
 
-	//If this fails, send "error" response
-	//TODO send actual error to Lambda
 	if err != nil {
 		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
 	}
