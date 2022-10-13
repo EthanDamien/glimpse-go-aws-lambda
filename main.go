@@ -89,6 +89,7 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return admin.CreateAdmin(ctx, reqID, dest, db)
+	// SHIFT
 	case "createShift":
 		var dest shift.CreateShiftRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
@@ -101,6 +102,30 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return admin.GetAdmin(ctx, reqID, dest, db)
+	case "updateShift":
+		var dest shift.UpdateShiftRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.UpdateShift(ctx, reqID, dest, db)
+	case "getAllShifts":
+		var dest shift.GetAllShiftsRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.GetAllShifts(ctx, reqID, dest, db)
+	case "getEmployeeShifts":
+		var dest shift.GetEmployeeShiftsRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.GetEmployeeShifts(ctx, reqID, dest, db)
+	case "getShift":
+		var dest shift.GetShiftRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.GetShift(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
