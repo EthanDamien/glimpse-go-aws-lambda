@@ -24,7 +24,7 @@ type UpdateShiftResponse struct {
 
 // Template to be used to insert to Table
 const updateShiftTemplate = `
-UPDATE Shift SET ClockInTime="%s", ClockOutTime="%s", Earnings="%f" where ShiftEventID == "%d";`
+UPDATE Shift SET ClockInTime="%s", ClockOutTime="%s", Earnings="%f" where ShiftEventID = %d;`
 
 func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *sql.DB) (UpdateShiftResponse, error) {
 
@@ -49,7 +49,7 @@ func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *
 	//If this fails, send "error" response
 	//TODO send actual error to Lambda
 	if err != nil {
-		return UpdateShiftResponse{DESC: "Could not update Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+		return UpdateShiftResponse{DESC: "Could not update Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
 	}
 	return UpdateShiftResponse{DESC: "UpdateShift success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
