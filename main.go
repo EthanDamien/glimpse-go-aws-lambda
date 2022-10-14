@@ -77,18 +77,32 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 
 	//This is the first row in the json request and will do certain things based on this variable
 	switch req.Event {
+	// EMPLOYEE
 	case "createUser":
 		var dest user.CreateUserRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
 		return user.CreateUser(ctx, reqID, dest)
+	case "getEmployeeShifts":
+		var dest shift.GetEmployeeShiftsRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.GetEmployeeShifts(ctx, reqID, dest, db)
+	// ADMIN
 	case "createAdmin":
 		var dest admin.CreateAdminRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
 		return admin.CreateAdmin(ctx, reqID, dest, db)
+	case "getAdmin":
+		var dest admin.GetAdminRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return admin.GetAdmin(ctx, reqID, dest, db)
 	// SHIFT
 	case "createShift":
 		var dest shift.CreateShiftRequest
@@ -96,12 +110,7 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return shift.CreateShift(ctx, reqID, dest, db)
-	case "getAdmin":
-		var dest admin.GetAdminRequest
-		if err := json.Unmarshal(req.Body, &dest); err != nil {
-			return nil, err
-		}
-		return admin.GetAdmin(ctx, reqID, dest, db)
+
 	case "updateShift":
 		var dest shift.UpdateShiftRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
@@ -114,12 +123,6 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return shift.GetAllShifts(ctx, reqID, dest, db)
-	case "getEmployeeShifts":
-		var dest shift.GetEmployeeShiftsRequest
-		if err := json.Unmarshal(req.Body, &dest); err != nil {
-			return nil, err
-		}
-		return shift.GetEmployeeShifts(ctx, reqID, dest, db)
 	case "getShift":
 		var dest shift.GetShiftRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
