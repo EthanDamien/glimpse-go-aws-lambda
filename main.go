@@ -83,8 +83,7 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
-		return user.CreateUser(ctx, reqID, dest)
-	// ADMIN
+		return user.CreateUser(ctx, reqID, dest, db)
 	case "createAdmin":
 		var dest admin.CreateAdminRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
