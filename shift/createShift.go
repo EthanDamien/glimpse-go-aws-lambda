@@ -22,8 +22,8 @@ type CreateShiftResponse struct {
 }
 
 const createShiftTemplate = `
-Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings) 
-values (NULL, %d, "%s", "%s", %f);`
+Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated) 
+values (NULL, %d, "%s", "%s", %f, "%s");`
 
 func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
 
@@ -37,7 +37,7 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("ClockInTime must be earlier than ClockOutTime")
 	}
 
-	var builtQuery = fmt.Sprintf(createShiftTemplate, req.EmployeeID, req.ClockInTime, req.ClockOutTime, req.Earnings)
+	var builtQuery = fmt.Sprintf(createShiftTemplate, req.EmployeeID, req.ClockInTime, req.ClockOutTime, req.Earnings, time.Now())
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {

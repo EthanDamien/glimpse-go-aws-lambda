@@ -34,16 +34,17 @@ type Shift struct {
 	ClockInTime  time.Time `json:"clockInTime"`
 	ClockOutTime time.Time `json:"clockOutTime"`
 	Earnings     float32   `json:"earnings"`
+	LastUpdated  time.Time `json:"lastUpdated"`
 }
 
 const getAllShiftsTemplate = `
-SELECT * FROM Shift WHERE ClockInTime >= "%s" AND ClockOutTime <= "%s";`
+SELECT * FROM Shift WHERE ClockInTime >= "%s" AND ClockOutTime <= "%s" ORDER BY LastUpdated DESC;`
 
 const getEmployeeShiftsTemplate = `
-SELECT * FROM Shift WHERE EmployeeID = %d;`
+SELECT * FROM Shift WHERE EmployeeID = %d ORDER BY LastUpdated DESC;`
 
 const getShiftTemplate = `
-SELECT * FROM Shift WHERE ShiftEventID = %d;`
+SELECT * FROM Shift WHERE ShiftEventID = %d ORDER BY LastUpdated DESC;`
 
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
@@ -106,7 +107,7 @@ func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {
 	for rows.Next() {
 		var shift Shift
 		if err := rows.Scan(&shift.ShiftEventID, &shift.EmployeeID, &shift.ClockInTime,
-			&shift.ClockOutTime, &shift.Earnings); err != nil {
+			&shift.ClockOutTime, &shift.Earnings, &shift.LastUpdated); err != nil {
 			return shifts, err
 		}
 		shifts = append(shifts, shift)
