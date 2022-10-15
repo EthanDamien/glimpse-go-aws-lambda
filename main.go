@@ -97,6 +97,13 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 		}
 		return admin.GetAdmin(ctx, reqID, dest, db)
 	// SHIFT
+	case "clockingAction":
+		var dest shift.ClockingActionRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		// constant employeeID for now
+		return shift.ClockingAction(ctx, reqID, dest, 1, db)
 	case "createShift":
 		var dest shift.CreateShiftRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
