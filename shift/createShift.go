@@ -33,9 +33,6 @@ func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *
 	if req.ClockInTime.IsZero() {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockInTime")
 	}
-	if req.ClockOutTime.IsZero() {
-		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockOutTime")
-	}
 	if req.ClockInTime.After(req.ClockOutTime) {
 		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("ClockInTime must be earlier than ClockOutTime")
 	}
