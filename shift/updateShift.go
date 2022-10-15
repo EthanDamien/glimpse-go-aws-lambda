@@ -23,7 +23,7 @@ type UpdateShiftResponse struct {
 }
 
 const updateShiftTemplate = `
-UPDATE Shift SET ClockInTime="%s", ClockOutTime="%s", Earnings="%f" where ShiftEventID = %d;`
+UPDATE Shift SET ClockInTime="%s", ClockOutTime="%s", Earnings="%f", LastUpdated="%s" where ShiftEventID = %d;`
 
 func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *sql.DB) (UpdateShiftResponse, error) {
 
@@ -40,7 +40,7 @@ func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *
 		return UpdateShiftResponse{DESC: "UpdateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("ClockInTime must be earlier than ClockOutTime")
 	}
 
-	var builtQuery = fmt.Sprintf(updateShiftTemplate, req.ClockInTime, req.ClockOutTime, req.Earnings, req.ShiftEventID)
+	var builtQuery = fmt.Sprintf(updateShiftTemplate, req.ClockInTime, req.ClockOutTime, req.Earnings, time.Now(), req.ShiftEventID)
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
