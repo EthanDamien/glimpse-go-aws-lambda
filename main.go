@@ -116,6 +116,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return shift.UpdateShift(ctx, reqID, dest, db)
+	case "getMostRecentShifts":
+		var dest shift.GetMostRecentShiftsRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return shift.GetMostRecentShifts(ctx, reqID, dest, db)
 	case "getAllShifts":
 		var dest shift.GetAllShiftsRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {

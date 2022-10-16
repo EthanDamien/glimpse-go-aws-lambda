@@ -7,9 +7,14 @@ import (
 	"time"
 )
 
+type GetMostRecentShiftsRequest struct {
+	AdminID int `json:"adminID"`
+}
+
 type GetAllShiftsRequest struct {
 	FromDate time.Time `json:"fromDate"`
 	ToDate   time.Time `json:"toDate"`
+	AdminID  int       `json:"adminID"`
 }
 
 type GetEmployeeShiftsRequest struct {
@@ -35,16 +40,33 @@ type Shift struct {
 	ClockOutTime time.Time `json:"clockOutTime"`
 	Earnings     float32   `json:"earnings"`
 	LastUpdated  time.Time `json:"lastUpdated"`
+	FirstName    string    `json:"firstname"`
+	LastName     string    `json:"lastname"`
 }
 
+const getMostRecentShifts = `
+SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE e.AdminID = %d ORDER BY LastUpdated DESC LIMIT 20;`
+
 const getAllShiftsTemplate = `
-SELECT * FROM Shift WHERE ClockInTime >= "%s" AND ClockOutTime <= "%s" ORDER BY LastUpdated DESC;`
+SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE ClockInTime >= "%s" AND ClockOutTime <= "%s" AND e.AdminID = %d
+ORDER BY LastUpdated;`
 
 const getEmployeeShiftsTemplate = `
-SELECT * FROM Shift WHERE EmployeeID = %d ORDER BY LastUpdated DESC;`
+SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE EmployeeID = %d ORDER BY LastUpdated DESC;`
 
 const getShiftTemplate = `
-SELECT * FROM Shift WHERE ShiftEventID = %d ORDER BY LastUpdated DESC;`
+SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE ShiftEventID = %d ORDER BY LastUpdated DESC;`
+
+func GetMostRecentShifts(ctx context.Context, reqID string, req GetMostRecentShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
+
+	var builtQuery = fmt.Sprintf(getMostRecentShifts, req.AdminID)
+	res, err := getQueryRes(builtQuery, db)
+	if err != nil {
+		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+	}
+
+	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+}
 
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
@@ -55,7 +77,7 @@ func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db
 		return GetShiftResponse{DESC: "Could not get shifts - missing ToDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ToDate")
 	}
 
-	var builtQuery = fmt.Sprintf(getAllShiftsTemplate, req.FromDate, req.ToDate)
+	var builtQuery = fmt.Sprintf(getAllShiftsTemplate, req.FromDate, req.ToDate, req.AdminID)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
 		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
@@ -107,7 +129,7 @@ func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {
 	for rows.Next() {
 		var shift Shift
 		if err := rows.Scan(&shift.ShiftEventID, &shift.EmployeeID, &shift.ClockInTime,
-			&shift.ClockOutTime, &shift.Earnings, &shift.LastUpdated); err != nil {
+			&shift.ClockOutTime, &shift.Earnings, &shift.LastUpdated, &shift.FirstName, &shift.LastName); err != nil {
 			return shifts, err
 		}
 		shifts = append(shifts, shift)
