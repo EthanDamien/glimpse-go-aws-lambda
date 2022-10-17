@@ -52,8 +52,8 @@ func getQueryRes(builtQuery string, db *sql.DB) ([]User, error) {
 
 	for rows.Next() {
 		var user User
-		if err := rows.Scan(&user.Email, &user.EmployeeID, &user.FirstName,
-			&user.LastName, &user.JobTitle); err != nil {
+		if err := rows.Scan(&user.Email, &user.FirstName, &user.LastName,
+			&user.JobTitle, &user.EmployeeID); err != nil {
 			return users, err
 		}
 		users = append(users, user)
