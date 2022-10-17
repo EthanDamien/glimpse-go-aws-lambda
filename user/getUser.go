@@ -27,7 +27,7 @@ type User struct {
 	EmployeeID string `json:"employeeID"`
 }
 
-const getAllUsers = `SELECT e.EmployeeID, e.FirstName, e.LastName, e.JobTitle, e.Email FROM Employees e WHERE e.AdminID = %d;`
+const getAllUsers = `SELECT e.Email, e.FirstName, e.LastName, e.JobTitle, e.EmployeeID FROM Employees e WHERE e.AdminID = %d;`
 
 func GetAllUsers(ctx context.Context, reqID string, req GetAllUsersRequest, db *sql.DB) (GetUserResponse, error) {
 
