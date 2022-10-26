@@ -8,6 +8,7 @@ import (
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/login"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
@@ -90,6 +91,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return user.GetAllUsers(ctx, reqID, dest, db)
+	case "employeeLogin":
+		var dest login.EmployeeLoginRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return login.EmployeeLogin(ctx, reqID, dest, db)
 	case "createAdmin":
 		var dest admin.CreateAdminRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
@@ -102,6 +109,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return admin.GetAdmin(ctx, reqID, dest, db)
+	case "adminLogin":
+		var dest login.AdminLoginRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return login.AdminLogin(ctx, reqID, dest, db)
 	// SHIFT
 	case "clockingAction":
 		var dest shift.ClockingActionRequest
