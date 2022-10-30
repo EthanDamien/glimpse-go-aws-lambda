@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/compare"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
@@ -146,6 +147,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return shift.GetEmployeeShifts(ctx, reqID, dest, db)
+	case "testCompare":
+		var dest compare.CompareReq
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return compare.TestCompare(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
