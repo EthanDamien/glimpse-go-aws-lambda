@@ -109,6 +109,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return admin.GetAdmin(ctx, reqID, dest, db)
+	case "getAdminByAdminID":
+		var dest admin.GetAdminByAdminIDRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return admin.GetAdminByAdminID(ctx, reqID, dest, db)
 	case "adminLogin":
 		var dest login.AdminLoginRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
