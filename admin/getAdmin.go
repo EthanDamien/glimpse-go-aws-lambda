@@ -4,18 +4,31 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 type GetAdminRequest struct {
 	Email string `json:"email"`
 }
 
+type GetAdminByAdminIDRequest struct {
+	AdminID int `json:"adminID"`
+}
+
 type Admin struct {
 	AdminID      string `json:"AdminID"`
-	AdminPIN     string `json:"AdminPIN"`
-	Company_Name string `json:"Company_Name"`
 	Email        string `json:"Email"`
 	Password     string `json:"Password"`
+	Company_Name string `json:"Company_Name"`
+	AdminPIN     string `json:"AdminPIN"`
+}
+
+type AdminIDResponse struct {
+	RES   Admin  `json:"res"`
+	DESC  string `json:"desc"`
+	OK    bool   `json:"ok"`
+	ID    int64  `json:"id"`
+	ReqID string `json:"req_id"`
 }
 
 const getAllAdmins = `
@@ -26,6 +39,9 @@ Password, 'Company_Name', Company_Name, 'AdminPIN', AdminPIN)) from Admins;
 const getSpecificAdmin = `
 SELECT JSON_ARRAYAGG(JSON_OBJECT('AdminID', AdminID, 'Email', Email, 'Password', 
 Password, 'Company_Name', Company_Name, 'AdminPIN', AdminPIN)) from Admins WHERE Email = "%s";
+`
+const getSpecificAdminByID = `
+SELECT * from Admins WHERE AdminID = "%d";
 `
 
 func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB) (AdminResponse, error) {
@@ -48,4 +64,36 @@ func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB
 	}
 
 	return AdminResponse{DESC: res}, nil
+}
+
+func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDRequest, db *sql.DB) (AdminIDResponse, error) {
+	//validate JSON
+	var query = ""
+	query = fmt.Sprintf(getSpecificAdminByID, req.AdminID)
+	res, err := getQueryRes(query, db)
+	if err != nil {
+		return AdminIDResponse{DESC: "Error Querying Admins Table"}, fmt.Errorf("Could not query Admins")
+	}
+
+	return AdminIDResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+}
+
+func getQueryRes(builtQuery string, db *sql.DB) (Admin, error) {
+	rows, err := db.Query(builtQuery)
+
+	if err != nil {
+		return Admin{}, err
+	}
+	defer rows.Close()
+
+	var adminFound Admin
+
+	for rows.Next() {
+		var admin Admin
+		if err := rows.Scan(&admin.AdminID, &admin.Email, &admin.Password, &admin.Company_Name, &admin.AdminPIN); err != nil {
+			return admin, err
+		}
+		adminFound = admin
+	}
+	return adminFound, nil
 }
