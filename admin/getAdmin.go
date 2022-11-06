@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 type GetAdminRequest struct {
@@ -16,10 +17,18 @@ type GetAdminByAdminIDRequest struct {
 
 type Admin struct {
 	AdminID      string `json:"AdminID"`
-	AdminPIN     string `json:"AdminPIN"`
-	Company_Name string `json:"Company_Name"`
 	Email        string `json:"Email"`
 	Password     string `json:"Password"`
+	Company_Name string `json:"Company_Name"`
+	AdminPIN     string `json:"AdminPIN"`
+}
+
+type AdminIDResponse struct {
+	RES   Admin  `json:"res"`
+	DESC  string `json:"desc"`
+	OK    bool   `json:"ok"`
+	ID    int64  `json:"id"`
+	ReqID string `json:"req_id"`
 }
 
 const getAllAdmins = `
@@ -32,8 +41,7 @@ SELECT JSON_ARRAYAGG(JSON_OBJECT('AdminID', AdminID, 'Email', Email, 'Password',
 Password, 'Company_Name', Company_Name, 'AdminPIN', AdminPIN)) from Admins WHERE Email = "%s";
 `
 const getSpecificAdminByID = `
-SELECT JSON_ARRAYAGG(JSON_OBJECT('AdminID', AdminID, 'Email', Email, 'Password', 
-Password, 'Company_Name', Company_Name, 'AdminPIN', AdminPIN)) from Admins WHERE AdminID = "%d";
+SELECT * from Admins WHERE AdminID = "%d";
 `
 
 func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB) (AdminResponse, error) {
@@ -58,21 +66,34 @@ func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB
 	return AdminResponse{DESC: res}, nil
 }
 
-func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDRequest, db *sql.DB) (AdminResponse, error) {
+func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDRequest, db *sql.DB) (AdminIDResponse, error) {
 	//validate JSON
 	var query = ""
 	query = fmt.Sprintf(getSpecificAdminByID, req.AdminID)
-
-	rows, err := db.QueryContext(ctx, query)
+	res, err := getQueryRes(query, db)
 	if err != nil {
-		return AdminResponse{DESC: "Error Querying Admins Table"}, fmt.Errorf("Could not query Admins")
+		return AdminIDResponse{DESC: "Error Querying Admins Table"}, fmt.Errorf("Could not query Admins")
 	}
 
-	var res string
-	rows.Next()
-	if err := rows.Scan(&res); err != nil {
-		return AdminResponse{DESC: "Error Converting to String"}, fmt.Errorf("SQL conversion to String error")
-	}
+	return AdminIDResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+}
 
-	return AdminResponse{DESC: res}, nil
+func getQueryRes(builtQuery string, db *sql.DB) (Admin, error) {
+	rows, err := db.Query(builtQuery)
+
+	if err != nil {
+		return Admin{}, err
+	}
+	defer rows.Close()
+
+	var adminFound Admin
+
+	for rows.Next() {
+		var admin Admin
+		if err := rows.Scan(&admin.AdminID, &admin.Email, &admin.Password, &admin.Company_Name, &admin.AdminPIN); err != nil {
+			return admin, err
+		}
+		adminFound = admin
+	}
+	return adminFound, nil
 }
