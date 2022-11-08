@@ -172,6 +172,18 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return compare.TestCompare(ctx, reqID, dest, db)
+	case "uploadImageForAdmin":
+		var dest admin.UploadPictureRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return admin.UploadImageForAdmin(ctx, reqID, dest)
+	case "findMatchingEmployee":
+		var dest compare.FindMatchingReq
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return compare.FindMatchingEmployee(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
