@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/clockLog"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/compare"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/login"
@@ -178,12 +179,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return admin.UploadImageForAdmin(ctx, reqID, dest)
-	case "findMatchingEmployee":
-		var dest compare.FindMatchingReq
+	case "clockLog":
+		var dest clockLog.AttemptClockLogReq
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
 			return nil, err
 		}
-		return compare.FindMatchingEmployee(ctx, reqID, dest, db)
+		return clockLog.AttemptClockLog(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)

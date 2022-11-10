@@ -2,7 +2,6 @@ package compare
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
@@ -32,26 +31,20 @@ type FindMatchingReq struct {
 const findEmployeesPerAdminIDTemplate = `SELECT EmployeeID from Employees where AdminID = "%s";`
 
 // Using json input, find a matching employee for the given adminID, and image.
-func FindMatchingEmployee(ctx context.Context, reqID string, req FindMatchingReq, db *sql.DB) (CompareResponse, error) {
-	if req.AdminID == "" {
-		return CompareResponse{DESC: "Find Matching Employee Error"}, fmt.Errorf("Missing AdminID")
-	}
-	if req.PictureMeta64 == "" {
-		return CompareResponse{DESC: "Find Matching Employee Error"}, fmt.Errorf("Missing PictureMetadata")
-	}
+func FindMatchingEmployee(AdminId string, PictureMeta64 string, db *sql.DB) (int, error) {
 
 	//create random image name and upload it
 	tempImageNum := rand.Intn(10000)
 	var tempImageName = strconv.Itoa(tempImageNum)
 
-	image.UploadImage(req.PictureMeta64, tempImageName, "facefiles")
+	image.UploadImage(PictureMeta64, tempImageName, "facefiles")
 
 	//Do the query
-	var builtQuery = fmt.Sprintf(findEmployeesPerAdminIDTemplate, req.AdminID)
+	var builtQuery = fmt.Sprintf(findEmployeesPerAdminIDTemplate, AdminId)
 	employeeIDs, err := getQueryRes(builtQuery, db)
 	if err != nil {
 		// image.DeleteImage(tempImageName)
-		return CompareResponse{DESC: "Find Matching Query Err"}, err
+		return 0, err
 	}
 	for _, id := range employeeIDs {
 		var tempImageNameLoc = fmt.Sprintf("%s.jpg", tempImageName)
@@ -59,17 +52,17 @@ func FindMatchingEmployee(ctx context.Context, reqID string, req FindMatchingReq
 		log.Printf("Checking %s", idAsNameLoc)
 		isMatch, err, _ := Compare(idAsNameLoc, tempImageNameLoc)
 		if err != nil {
-			// image.DeleteImage(tempImageName)
-			return CompareResponse{DESC: "Compare Err"}, err
+			image.DeleteImage(tempImageName)
+			return 0, err
 		}
 		if isMatch {
-			// image.DeleteImage(tempImageName)
-			return CompareResponse{DESC: strconv.Itoa(id.EmployeeID)}, nil
+			image.DeleteImage(tempImageName)
+			return id.EmployeeID, nil
 		}
 	}
 
 	// image.DeleteImage(tempImageName)
-	return CompareResponse{DESC: "Employee not found"}, nil
+	return 0, fmt.Errorf("Employee Not Found")
 }
 
 func getQueryRes(builtQuery string, db *sql.DB) ([]EmployeeID, error) {

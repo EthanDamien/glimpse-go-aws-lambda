@@ -90,22 +90,24 @@ func Compare(location1 string, location2 string) (bool, error, rekognition.Compa
 	})
 
 	//Validate if location is an existing object
-	keyExists, err := keyExists("facefiles", location1, sess)
+	keyExistsLoc1, err := keyExists("facefiles", location1, sess)
 
 	if err != nil {
 		return false, fmt.Errorf("Failure in KeyExists"), rekognition.CompareFacesOutput{}
 	}
 
-	if !keyExists {
+	keyExistsLoc2, err := keyExists("facefiles", location2, sess)
+
+	if err != nil {
+		return false, fmt.Errorf("Failure in KeyExists"), rekognition.CompareFacesOutput{}
+	}
+
+	if !keyExistsLoc1 || !keyExistsLoc2 {
 		log.Printf("Appearance does not exist for: %s", location1)
 		return false, nil, rekognition.CompareFacesOutput{}
 	}
 
 	svc := rekognition.New(sess)
-
-	if err != nil {
-		return false, fmt.Errorf("Failure Decoding Image"), rekognition.CompareFacesOutput{}
-	}
 
 	log.Printf("Comparing %s to %s", location1, location2)
 	input := &rekognition.CompareFacesInput{

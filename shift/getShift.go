@@ -136,3 +136,8 @@ func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {
 	}
 	return shifts, nil
 }
+
+func GetEarnings(pastTime time.Time, forwardTime time.Time, wage float64) float64 {
+	diffInHours := forwardTime.Sub(pastTime).Hours()
+	return wage * diffInHours
+}
