@@ -33,9 +33,9 @@ values (NULL, %d, "%s", "%s", %f, "%s");`
 
 const createShiftTemplateForClockIn = `
 Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated) 
-values (NULL, %d, "%s", NULL, NULL, "%s");`
+values (NULL, %d, "%s", CAST("0000-00-00 00:00:00" as DATETIME), 0, "%s");`
 
-const checkActiveShiftTemplate = `select ShiftEventID, ClockInTime from Shift where EmployeeID = %s and ClockOutTime is NULL;`
+const checkActiveShiftTemplate = `select ShiftEventID, ClockInTime from Shift where EmployeeID = %s and ClockOutTime = CAST("0000-00-00 00:00:00" as DATETIME)`
 
 func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
 

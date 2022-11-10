@@ -14,6 +14,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/wage"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
@@ -191,6 +192,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return clockLog.AttemptClockLog(ctx, reqID, dest, db)
+	case "createWage":
+		var dest wage.CreateWageRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return wage.CreateWage(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
