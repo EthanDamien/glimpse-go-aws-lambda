@@ -8,10 +8,13 @@ import (
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/compare"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type AttemptClockLogRes struct {
-	DESC string `json:"body"`
+	StatusCode string `json:"StatusCode"`
+	Event      string `json:"Event"`
+	EmployeeID int    `json:"EmployeeID"`
 }
 
 type AttemptClockLogReq struct {
@@ -22,26 +25,45 @@ type AttemptClockLogReq struct {
 func AttemptClockLog(ctx context.Context, reqID string, req AttemptClockLogReq, db *sql.DB) (AttemptClockLogRes, error) {
 	//validate JSON
 	if req.AdminID == "" {
-		return AttemptClockLogRes{DESC: "AttemptClockLog err"}, fmt.Errorf("Missing AdminID")
+		return AttemptClockLogRes{
+			StatusCode: statuscode.C500,
+			Event:      "MissingAdminID",
+		}, fmt.Errorf("Missing AdminID")
 	}
 	if req.PictureMeta64 == "" {
-		return AttemptClockLogRes{DESC: "AttemptClockLog err"}, fmt.Errorf("Missing Image")
+		return AttemptClockLogRes{
+			StatusCode: statuscode.C500,
+			Event:      "MissingImage",
+		}, fmt.Errorf("Missing Image")
 	}
 	employeeID, err := compare.FindMatchingEmployee(req.AdminID, req.PictureMeta64, db)
 	if err != nil {
 		if err.Error() == "Employee Not Found" {
 			//Return
-			return AttemptClockLogRes{DESC: "Employee Not Found err"}, err
+			return AttemptClockLogRes{
+				StatusCode: statuscode.C500,
+				Event:      "Employee Not Found",
+			}, err
 		}
-		return AttemptClockLogRes{DESC: "AttemptClockLogErr"}, err
+		return AttemptClockLogRes{
+			StatusCode: statuscode.C500,
+			Event:      "Find Matching Employee Error",
+		}, err
 	}
 
 	//clock in/out
 	clockLog, err := shift.GenerateShiftorUpdate(ctx, strconv.Itoa(employeeID), db)
 	if err != nil {
-		return AttemptClockLogRes{DESC: "Error when Generating/updating shift"}, err
+		return AttemptClockLogRes{
+			StatusCode: statuscode.C500,
+			Event:      "Error when Generating/updating shift",
+		}, err
 	}
 
-	return AttemptClockLogRes{DESC: fmt.Sprintf("%s, %d", clockLog, employeeID)}, nil
+	return AttemptClockLogRes{
+		StatusCode: statuscode.C200,
+		Event:      clockLog,
+		EmployeeID: employeeID,
+	}, nil
 
 }
