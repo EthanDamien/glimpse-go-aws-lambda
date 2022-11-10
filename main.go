@@ -93,6 +93,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return user.GetAllUsers(ctx, reqID, dest, db)
+	case "updateUserPassword":
+		var dest user.UpdateUserPasswordRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return user.UpdateUserPassword(ctx, reqID, dest, db)
 	case "employeeLogin":
 		var dest login.EmployeeLoginRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {

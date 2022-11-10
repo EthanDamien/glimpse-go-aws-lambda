@@ -52,7 +52,7 @@ SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpda
 ORDER BY LastUpdated;`
 
 const getEmployeeShiftsTemplate = `
-SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE EmployeeID = %d ORDER BY LastUpdated DESC;`
+SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE s.EmployeeID = %d ORDER BY LastUpdated DESC;`
 
 const getShiftTemplate = `
 SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE ShiftEventID = %d ORDER BY LastUpdated DESC;`
