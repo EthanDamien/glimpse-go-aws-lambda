@@ -1,4 +1,4 @@
 package statuscode
 
-const C500 = `500, Internal Server Error`
-const C200 = `200,`
+const C500 = "Status:500"
+const C200 = "Status:200"
