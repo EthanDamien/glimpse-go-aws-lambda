@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type GetMostRecentShiftsRequest struct {
@@ -26,11 +28,9 @@ type GetShiftRequest struct {
 }
 
 type GetShiftResponse struct {
-	RES   []Shift `json:"res"`
-	DESC  string  `json:"desc"`
-	OK    bool    `json:"ok"`
-	ID    int64   `json:"id"`
-	ReqID string  `json:"req_id"`
+	StatusCode string  `json:"StatusCode"`
+	RES        []Shift `json:"RES"`
+	DESC       string  `json:"DESC"`
 }
 
 type Shift struct {
@@ -57,63 +57,108 @@ SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpda
 const getShiftTemplate = `
 SELECT ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName FROM Shift s INNER JOIN Employees e ON e.EmployeeID = s.EmployeeID WHERE ShiftEventID = %d ORDER BY LastUpdated DESC;`
 
+const getShiftsBetweenDatesTemplate = `
+Select ShiftEventID, s.EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated, FirstName, LastName 
+from Shift where EmployeeID = "7" and 
+ClockInTime >= CAST("%s" as DATETIME) and 
+ClockInTime <= CAST("%s" as DATETIME) and
+ClockOutTime >= CAST("%s" as DATETIME) and 
+ClockOutTime <= CAST("%s" as DATETIME) 
+ORDER BY ShiftEventID DESC;`
+
 func GetMostRecentShifts(ctx context.Context, reqID string, req GetMostRecentShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	var builtQuery = fmt.Sprintf(getMostRecentShifts, req.AdminID)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
-		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts",
+		}, err
 	}
 
-	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return GetShiftResponse{
+		StatusCode: statuscode.C200,
+		RES:        res,
+	}, nil
 }
 
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.FromDate.IsZero() {
-		return GetShiftResponse{DESC: "Could not get shifts - missing FromDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing FromDate")
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts - missing FromDate",
+		}, fmt.Errorf("Missing FromDate")
 	}
 	if req.ToDate.IsZero() {
-		return GetShiftResponse{DESC: "Could not get shifts - missing ToDate", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ToDate")
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts - missing ToDate",
+		}, fmt.Errorf("Missing ToDate")
 	}
 
 	var builtQuery = fmt.Sprintf(getAllShiftsTemplate, req.FromDate, req.ToDate, req.AdminID)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
-		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts",
+		}, err
 	}
 
-	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return GetShiftResponse{
+		StatusCode: statuscode.C200,
+		RES:        res,
+	}, nil
 }
 
 func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.EmployeeID == 0 {
-		return GetShiftResponse{DESC: "Could not get shifts - missing EmployeeID", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts - missing EmployeeID",
+		}, fmt.Errorf("Missing EmployeeID")
 	}
 
 	var builtQuery = fmt.Sprintf(getEmployeeShiftsTemplate, req.EmployeeID)
 	res, err := getQueryRes(builtQuery, db)
 
 	if err != nil {
-		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts",
+		}, err
 	}
-	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return GetShiftResponse{
+		StatusCode: statuscode.C200,
+		RES:        res,
+	}, nil
 }
 
 func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.ShiftEventID == 0 {
-		return GetShiftResponse{DESC: "Could not get shifts - missing ShiftEventID", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing ShiftEventID")
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts - missing ShiftEventID",
+		}, fmt.Errorf("Missing ShiftEventID")
 	}
 
 	var builtQuery = fmt.Sprintf(getShiftTemplate, req.ShiftEventID)
 	res, err := getQueryRes(builtQuery, db)
 
 	if err != nil {
-		return GetShiftResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return GetShiftResponse{
+			StatusCode: statuscode.C500,
+			DESC:       "Could not get shifts",
+		}, err
 	}
-	return GetShiftResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return GetShiftResponse{
+		StatusCode: statuscode.C200,
+		RES:        res,
+	}, nil
 }
 
 func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {

@@ -10,6 +10,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/clockLog"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/compare"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/employeeTableData"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/login"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
@@ -198,6 +199,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return wage.CreateWage(ctx, reqID, dest, db)
+	case "getEmployeeTableData":
+		var dest employeeTableData.GetEmployeeTableDataReq
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return employeeTableData.GetEmployeeTableData(ctx, reqID, dest, db)
 	}
 
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)

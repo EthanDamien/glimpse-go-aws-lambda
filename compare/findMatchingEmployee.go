@@ -22,11 +22,6 @@ type EmployeeID struct {
 	EmployeeID int `json:"employeeID"`
 }
 
-type FindMatchingReq struct {
-	AdminID       string `json:"AdminID"`
-	PictureMeta64 string `json:"PictureMeta64"`
-}
-
 // Query AdminID
 const findEmployeesPerAdminIDTemplate = `SELECT EmployeeID from Employees where AdminID = "%s";`
 
