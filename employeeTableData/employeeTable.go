@@ -9,7 +9,7 @@ import (
 )
 
 type GetEmployeeTableDataReq struct {
-	EmployeeID int `json:"EmployeeID"`
+	EmployeeID int `json:"employeeID"`
 }
 
 type GetEmployeeTableDataRes struct {
