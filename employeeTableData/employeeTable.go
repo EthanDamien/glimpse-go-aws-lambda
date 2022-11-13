@@ -9,7 +9,7 @@ import (
 )
 
 type GetEmployeeTableDataReq struct {
-	EmployeeID string `json:"EmployeeID"`
+	EmployeeID int `json:"EmployeeID"`
 }
 
 type GetEmployeeTableDataRes struct {
@@ -23,7 +23,7 @@ type GetEmployeeTableDataRes struct {
 }
 
 func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTableDataReq, db *sql.DB) (GetEmployeeTableDataRes, error) {
-	if req.EmployeeID == "" {
+	if req.EmployeeID == 0 {
 		return GetEmployeeTableDataRes{
 			StatusCode: statuscode.C500,
 		}, fmt.Errorf("EmployeeID Missing")
