@@ -34,8 +34,13 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	var yearQuery = fmt.Sprintf(GetDataForYearTemplate, req.EmployeeID)
 
 	resWeek, err := getQueryRes(weekQuery, db)
-	var weekMinutes = resWeek[0].Minutes
-	var weekEarnings = resWeek[0].Earnings
+
+	var weekMinutes = 0
+	var weekEarnings = 0.0
+	if len(resWeek) != 0 {
+		weekMinutes = resWeek[0].Minutes
+		weekEarnings = resWeek[0].Earnings
+	}
 
 	if err != nil {
 		return GetEmployeeTableDataRes{
@@ -44,8 +49,12 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	}
 
 	resMonth, err := getQueryRes(monthQuery, db)
-	var monthMinutes = resMonth[0].Minutes
-	var monthEarnings = resMonth[0].Earnings
+	var monthMinutes = 0
+	var monthEarnings = 0.0
+	if len(resMonth) != 0 {
+		monthMinutes = resMonth[0].Minutes
+		monthEarnings = resMonth[0].Earnings
+	}
 
 	if err != nil {
 		return GetEmployeeTableDataRes{
@@ -54,8 +63,12 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	}
 
 	resYear, err := getQueryRes(yearQuery, db)
-	var yearMinutes = resYear[0].Minutes
-	var yearEarnings = resYear[0].Earnings
+	var yearMinutes = 0
+	var yearEarnings = 0.0
+	if len(resYear) != 0 {
+		yearMinutes = resYear[0].Minutes
+		yearEarnings = resYear[0].Earnings
+	}
 
 	if err != nil {
 		return GetEmployeeTableDataRes{
