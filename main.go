@@ -206,7 +206,7 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 		}
 		return employeeTableData.GetEmployeeTableData(ctx, reqID, dest, db)
 	}
-
+	db.Close()
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
 }
 
