@@ -33,7 +33,7 @@ func FindMatchingEmployee(AdminId string, PictureMeta64 string, db *sql.DB) (int
 	var tempImageName = strconv.Itoa(tempImageNum)
 
 	image.UploadImage(PictureMeta64, tempImageName, "facefiles")
-
+	var tempImageNameLoc = fmt.Sprintf("%s.jpg", tempImageName)
 	//Do the query
 	var builtQuery = fmt.Sprintf(findEmployeesPerAdminIDTemplate, AdminId)
 	employeeIDs, err := getQueryRes(builtQuery, db)
@@ -42,21 +42,20 @@ func FindMatchingEmployee(AdminId string, PictureMeta64 string, db *sql.DB) (int
 		return 0, err
 	}
 	for _, id := range employeeIDs {
-		var tempImageNameLoc = fmt.Sprintf("%s.jpg", tempImageName)
 		var idAsNameLoc = fmt.Sprintf("%s.jpg", strconv.Itoa(id.EmployeeID))
 		log.Printf("Checking %s", idAsNameLoc)
 		isMatch, err, _ := Compare(idAsNameLoc, tempImageNameLoc)
 		if err != nil {
-			image.DeleteImage(tempImageName)
+			image.DeleteImage(tempImageNameLoc)
 			return 0, err
 		}
 		if isMatch {
-			image.DeleteImage(tempImageName)
+			image.DeleteImage(tempImageNameLoc)
 			return id.EmployeeID, nil
 		}
 	}
 
-	// image.DeleteImage(tempImageName)
+	image.DeleteImage(tempImageNameLoc)
 	return 0, fmt.Errorf("Employee Not Found")
 }
 
