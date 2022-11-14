@@ -4,7 +4,7 @@ const GetDataFromWeekTemplate = `
 select EmployeeID, SUM(Minutes) as Minutes, SUM(Earnings) as Earnings
 from (
 	select EmployeeID, TIMESTAMPDIFF(MINUTE, ClockInTime, ClockOutTime) as Minutes, Earnings from Shift where 
-	EmployeeID = %s and
+	EmployeeID = %d and
 	week(ClockInTime)=week(now()) 
 	order by clockInTime asc
 	) as WeekData
@@ -14,7 +14,7 @@ const GetDataForMonthTemplate = `
 select EmployeeID, SUM(Minutes) as Minutes, SUM(Earnings) as Earnings
 from (
 	select EmployeeID, TIMESTAMPDIFF(MINUTE, ClockInTime, ClockOutTime) as Minutes, Earnings from Shift where 
-	EmployeeID = %s and
+	EmployeeID = %d and
 	month(ClockInTime)=month(now()) 
 	order by clockInTime asc
 	) as MonthData
@@ -24,7 +24,7 @@ const GetDataForYearTemplate = `
 select EmployeeID, SUM(Minutes) as Minutes, SUM(Earnings) as Earnings
 from (
 	select EmployeeID, TIMESTAMPDIFF(MINUTE, ClockInTime, ClockOutTime) as Minutes, Earnings from Shift where 
-	EmployeeID = %s and
+	EmployeeID = %d and
 	ClockInTime >= DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -365 DAY) 
 	order by clockInTime asc
     ) as YearData
