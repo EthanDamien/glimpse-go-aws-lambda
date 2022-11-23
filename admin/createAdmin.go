@@ -22,16 +22,16 @@ func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *
 
 	//validate JSON
 	if req.Email == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Missing Email")
+		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing Email")
 	}
 	if req.Password == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Missing Password")
+		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing Password")
 	}
 	if req.Company_Name == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Missing Company Name")
+		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing Company Name")
 	}
 	if req.AdminPIN == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Missing AdminPIN")
+		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing AdminPIN")
 	}
 
 	//Use the template and fill in the blanks
@@ -41,7 +41,7 @@ func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *
 	//If this fails, send "error" response
 	//TODO send actual error to Lambda
 	if err != nil {
-		return AdminResponse{DESC: "Could not insert into Admin Table"}, fmt.Errorf("Internal server error")
+		return AdminResponse{DESC: "Could not insert into Admin Table"}, fmt.Errorf("Status:500 Internal server error")
 	}
 	return AdminResponse{DESC: "Inserted into table"}, nil
 }
