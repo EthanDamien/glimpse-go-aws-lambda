@@ -1,10 +1,14 @@
 package wage
 
+import (
+	"context"
+	"database/sql"
+	"fmt"
+)
+
 type EditWageRequest struct {
-	WageEventID string `json:WageEventID`
-	EmployeeID  string `json:"EmployeeID"`
-	WagePerHour string `json:"WagePerHour"`
-	TimeToSet   string `json:"TimeToSet"`
+	WageEventID int `json:"WageEventID"`
+	WagePerHour int `json:"WagePerHour"`
 }
 
 type EditWageResponse struct {
@@ -14,28 +18,17 @@ type EditWageResponse struct {
 	ReqID string `json:"req_id"`
 }
 
-const editWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %s, %s, "%s"); `
+const editWageTemplate = `UPDATE Wage SET WagePerHour = %d WHERE WageEventID = %d;`
 
 //TODO: Edit wage
 
-// func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB) (EditWageResponse, error) {
-// 	if req.EmployeeID == "" {
-// 		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Missing EmployeeID")
-// 	}
-// 	if req.WagePerHour == "" {
-// 		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Missing WagePerHour")
-// 	}
-// 	if req.TimeToSet == "" {
-// 		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Missing TimeToSet")
-// 	}
+func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB) (EditWageResponse, error) {
+	var builtQuery = fmt.Sprintf(editWageTemplate, req.WagePerHour, req.WageEventID)
+	_, err := db.ExecContext(ctx, builtQuery)
 
-// 	var builtQuery = fmt.Sprintf(createWageTemplate, req.EmployeeID, req.WagePerHour, req.TimeToSet)
-// 	_, err := db.ExecContext(ctx, builtQuery)
+	if err != nil {
+		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Coudln't edit wage")
+	}
 
-// 	if err != nil {
-// 		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing Password")
-// 	}
-
-// 	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %s, Wage %s, TimeToSet %s",
-// 		req.EmployeeID, req.WagePerHour, req.TimeToSet)}, nil
-// }
+	return EditWageResponse{DESC: fmt.Sprintf("Wage successfully updated")}, nil
+}
