@@ -199,6 +199,18 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return wage.CreateWage(ctx, reqID, dest, db)
+	case "getWageEmployee":
+		var dest wage.GetWageRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return wage.GetWagesForEmployees(ctx, reqID, dest, db)
+	case "editWage":
+		var dest wage.EditWageRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return wage.EditWage(ctx, reqID, dest, db)
 	case "getEmployeeTableData":
 		var dest employeeTableData.GetEmployeeTableDataReq
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
