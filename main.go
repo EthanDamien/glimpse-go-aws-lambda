@@ -89,6 +89,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return user.CreateUser(ctx, reqID, dest, db)
+	case "deleteUser":
+		var dest user.DeleteUserRequest
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return user.DeleteUser(ctx, reqID, dest, db)
 	case "getAllUsers":
 		var dest user.GetAllUsersRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
