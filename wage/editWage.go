@@ -30,5 +30,5 @@ func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB
 		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Couldn't edit wage")
 	}
 
-	return EditWageResponse{DESC: fmt.Sprintf("Wage successfully updated")}, nil
+	return EditWageResponse{DESC: fmt.Sprintf("Wage successfully updated"), OK: true}, nil
 }
