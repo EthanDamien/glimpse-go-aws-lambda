@@ -14,8 +14,8 @@ where EmployeeId = %d
 order by TimeToSet desc;`
 
 type WageInfo struct {
-	WageEventID string  `json:"WageEventID"`
-	EmployeeID  string  `json:"EmployeeID"`
+	WageEventID int     `json:"WageEventID"`
+	EmployeeID  int     `json:"EmployeeID"`
 	WagePerHour float32 `json:"WagePerHour"`
 	TimeToSet   string  `json:"TimeToSet"`
 }

@@ -19,7 +19,7 @@ type CreateWageResponse struct {
 	ReqID string `json:"req_id"`
 }
 
-const createWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %d, %s, "%s"); `
+const createWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %d, %f, "%s"); `
 
 func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sql.DB) (CreateWageResponse, error) {
 	if req.EmployeeID == 0 {
@@ -39,6 +39,6 @@ func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sq
 		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing Password")
 	}
 
-	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %d, Wage %s, TimeToSet %s",
+	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %d, Wage %f, TimeToSet %s",
 		req.EmployeeID, req.WagePerHour, req.TimeToSet)}, nil
 }
