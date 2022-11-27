@@ -10,7 +10,7 @@ import (
 // This query will get the first wage for the current interval (where it's time to set is <= clockIn Time)
 const getWagesForEmployee = `
 select WageEventID, EmployeeID, WagePerHour, TimeToSet from Wage 
-where EmployeeId = %s 
+where EmployeeId = %d 
 order by TimeToSet;`
 
 type WageInfo struct {
@@ -21,7 +21,7 @@ type WageInfo struct {
 }
 
 type GetWageRequest struct {
-	EmployeeID string `json:"EmployeeID"`
+	EmployeeID int `json:"EmployeeID"`
 }
 
 type GetWageResponse struct {
@@ -34,7 +34,7 @@ type GetWageResponse struct {
 
 func GetWagesForEmployees(ctx context.Context, reqID string, req GetWageRequest, db *sql.DB) (GetWageResponse, error) {
 	// Get all wages for an employee
-	if req.EmployeeID == "" {
+	if req.EmployeeID == 0 {
 		return GetWageResponse{DESC: "EmployeeID is missing", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
 	}
 	var builtQuery = fmt.Sprintf(getWagesForEmployee, req.EmployeeID)
