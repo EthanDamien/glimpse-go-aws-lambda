@@ -11,7 +11,7 @@ import (
 const getWagesForEmployee = `
 select WageEventID, EmployeeID, WagePerHour, TimeToSet from Wage 
 where EmployeeId = %d 
-order by TimeToSet;`
+order by TimeToSet desc;`
 
 type WageInfo struct {
 	WageEventID string  `json:"WageEventID"`

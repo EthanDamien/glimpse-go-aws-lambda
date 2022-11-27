@@ -7,9 +7,9 @@ import (
 )
 
 type CreateWageRequest struct {
-	EmployeeID  int    `json:"EmployeeID"`
-	WagePerHour string `json:"WagePerHour"`
-	TimeToSet   string `json:"TimeToSet"`
+	EmployeeID  int     `json:"EmployeeID"`
+	WagePerHour float64 `json:"WagePerHour"`
+	TimeToSet   string  `json:"TimeToSet"`
 }
 
 type CreateWageResponse struct {
@@ -25,7 +25,7 @@ func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sq
 	if req.EmployeeID == 0 {
 		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing EmployeeID")
 	}
-	if req.WagePerHour == "" {
+	if req.WagePerHour == 0 {
 		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing WagePerHour")
 	}
 	if req.TimeToSet == "" {
