@@ -14,10 +14,10 @@ where EmployeeId = %d
 order by TimeToSet;`
 
 type WageInfo struct {
-	WageEventID string `json:"WageEventID"`
-	EmployeeID  string `json:"EmployeeID"`
-	WagePerHour string `json:"WagePerHour"`
-	TimeToSet   string `json:"TimeToSet"`
+	WageEventID string  `json:"WageEventID"`
+	EmployeeID  string  `json:"EmployeeID"`
+	WagePerHour float32 `json:"WagePerHour"`
+	TimeToSet   string  `json:"TimeToSet"`
 }
 
 type GetWageRequest struct {
