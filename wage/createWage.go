@@ -37,9 +37,9 @@ func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sq
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
-		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing Password")
+		return CreateWageResponse{DESC: "CreateWage err", OK: false}, fmt.Errorf("Missing Password")
 	}
 
 	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %d, Wage %f, TimeToSet %s",
-		req.EmployeeID, req.WagePerHour, req.TimeToSet)}, nil
+		req.EmployeeID, req.WagePerHour, req.TimeToSet), OK: true}, nil
 }
