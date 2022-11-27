@@ -7,7 +7,7 @@ import (
 )
 
 type CreateWageRequest struct {
-	EmployeeID  string `json:"EmployeeID"`
+	EmployeeID  int    `json:"EmployeeID"`
 	WagePerHour string `json:"WagePerHour"`
 	TimeToSet   string `json:"TimeToSet"`
 }
@@ -19,10 +19,10 @@ type CreateWageResponse struct {
 	ReqID string `json:"req_id"`
 }
 
-const createWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %s, %s, "%s"); `
+const createWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %d, %s, "%s"); `
 
 func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sql.DB) (CreateWageResponse, error) {
-	if req.EmployeeID == "" {
+	if req.EmployeeID == 0 {
 		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing EmployeeID")
 	}
 	if req.WagePerHour == "" {
@@ -39,6 +39,6 @@ func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sq
 		return CreateWageResponse{DESC: "CreateWage err"}, fmt.Errorf("Missing Password")
 	}
 
-	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %s, Wage %s, TimeToSet %s",
+	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %d, Wage %s, TimeToSet %s",
 		req.EmployeeID, req.WagePerHour, req.TimeToSet)}, nil
 }
