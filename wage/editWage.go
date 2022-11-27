@@ -7,8 +7,8 @@ import (
 )
 
 type EditWageRequest struct {
-	WageEventID int `json:"WageEventID"`
-	WagePerHour int `json:"WagePerHour"`
+	WageEventID int     `json:"WageEventID"`
+	WagePerHour float32 `json:"WagePerHour"`
 }
 
 type EditWageResponse struct {
@@ -18,7 +18,7 @@ type EditWageResponse struct {
 	ReqID string `json:"req_id"`
 }
 
-const editWageTemplate = `UPDATE Wage SET WagePerHour = %d WHERE WageEventID = %d;`
+const editWageTemplate = `UPDATE Wage SET WagePerHour = %f WHERE WageEventID = %d;`
 
 //TODO: Edit wage
 
@@ -27,7 +27,7 @@ func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
-		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Coudln't edit wage")
+		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Couldn't edit wage")
 	}
 
 	return EditWageResponse{DESC: fmt.Sprintf("Wage successfully updated")}, nil
