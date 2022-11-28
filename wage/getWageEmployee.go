@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 // This query will get the first wage for the current interval (where it's time to set is <= clockIn Time)
@@ -25,27 +27,25 @@ type GetWageRequest struct {
 }
 
 type GetWageResponse struct {
-	RES   []WageInfo `json:"res"`
-	DESC  string     `json:"desc"`
-	OK    bool       `json:"ok"`
-	ID    int64      `json:"id"`
-	ReqID string     `json:"req_id"`
+	RES  []WageInfo `json:"res"`
+	DESC string     `json:"desc"`
+	OK   bool       `json:"ok"`
 }
 
 func GetWagesForEmployees(ctx context.Context, reqID string, req GetWageRequest, db *sql.DB) (GetWageResponse, error) {
 	// Get all wages for an employee
 	if req.EmployeeID == 0 {
-		return GetWageResponse{DESC: "EmployeeID is missing", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
+		return GetWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing EmployeeID")
 	}
 	var builtQuery = fmt.Sprintf(getWagesForEmployee, req.EmployeeID)
 	res, err := getQueryResult(builtQuery, db)
 	if err != nil {
-		return GetWageResponse{DESC: "Could not get wages", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return GetWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Couldn't get wages for employee")
 	}
 	if len(res) == 0 {
-		return GetWageResponse{DESC: "Wages for employee does not exist", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Wages for employee doesn't exist")
+		return GetWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Wages for employee doesn't exist")
 	}
-	return GetWageResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return GetWageResponse{RES: res, OK: true}, nil
 
 }
 

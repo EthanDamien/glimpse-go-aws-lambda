@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/image"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -56,7 +57,7 @@ func FindMatchingEmployee(AdminId string, PictureMeta64 string, db *sql.DB) (int
 	}
 
 	image.DeleteImage(tempImageNameLoc)
-	return 0, fmt.Errorf("Employee Not Found")
+	return 0, fmt.Errorf(statuscode.C500, "Employee Not Found")
 }
 
 func getQueryRes(builtQuery string, db *sql.DB) ([]EmployeeID, error) {
@@ -84,7 +85,7 @@ func uploadPicture(base64Meta string, location string, bucket string) (bool, err
 	decodedImage, err := base64.StdEncoding.DecodeString(base64data)
 
 	if err != nil {
-		return false, fmt.Errorf(err.Error())
+		return false, fmt.Errorf(statuscode.C500, err.Error())
 	}
 	sess := session.New()
 
@@ -100,7 +101,7 @@ func uploadPicture(base64Meta string, location string, bucket string) (bool, err
 	_, err = uploader.Upload(uploadParameters)
 
 	if err != nil {
-		return false, fmt.Errorf(err.Error())
+		return false, fmt.Errorf(statuscode.C500, err.Error())
 	}
 
 	return true, nil

@@ -13,7 +13,6 @@ type GetEmployeeTableDataReq struct {
 }
 
 type GetEmployeeTableDataRes struct {
-	StatusCode       string  `json:"StatusCode"`
 	MinutesForWeek   int     `json:"MinutesForWeek"`
 	MinutesForMonth  int     `json:"MinutesForMonth"`
 	MinutesForYear   int     `json:"MinutesForYear"`
@@ -24,9 +23,7 @@ type GetEmployeeTableDataRes struct {
 
 func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTableDataReq, db *sql.DB) (GetEmployeeTableDataRes, error) {
 	if req.EmployeeID == 0 {
-		return GetEmployeeTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("EmployeeID Missing")
+		return GetEmployeeTableDataRes{}, fmt.Errorf(statuscode.C500, "EmployeeID Missing")
 	}
 
 	var weekQuery = fmt.Sprintf(GetDataFromWeekTemplate, req.EmployeeID)
@@ -43,9 +40,7 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	}
 
 	if err != nil {
-		return GetEmployeeTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("Week Query Err")
+		return GetEmployeeTableDataRes{}, fmt.Errorf(statuscode.C500, "Week Query Err")
 	}
 
 	resMonth, err := getQueryRes(monthQuery, db)
@@ -57,9 +52,7 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	}
 
 	if err != nil {
-		return GetEmployeeTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("Month Query Err")
+		return GetEmployeeTableDataRes{}, fmt.Errorf(statuscode.C500, "Month Query Err")
 	}
 
 	resYear, err := getQueryRes(yearQuery, db)
@@ -71,13 +64,10 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	}
 
 	if err != nil {
-		return GetEmployeeTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("Year Query Err")
+		return GetEmployeeTableDataRes{}, fmt.Errorf(statuscode.C500, "Year Query Err")
 	}
 
 	return GetEmployeeTableDataRes{
-		StatusCode:       statuscode.C200,
 		MinutesForWeek:   weekMinutes,
 		MinutesForMonth:  monthMinutes,
 		MinutesForYear:   yearMinutes,

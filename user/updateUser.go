@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type UpdateUserPasswordRequest struct {
@@ -14,10 +15,8 @@ type UpdateUserPasswordRequest struct {
 }
 
 type UpdateUserResponse struct {
-	DESC  string `json:"desc"`
-	OK    bool   `json:"ok"`
-	ID    int64  `json:"id"`
-	ReqID string `json:"req_id"`
+	DESC string `json:"desc"`
+	OK   bool   `json:"ok"`
 }
 
 const updateUserPwdTemplate = `
@@ -29,28 +28,28 @@ SELECT Password FROM Employees WHERE EmployeeID = "%d"`
 func UpdateUserPassword(ctx context.Context, reqID string, req UpdateUserPasswordRequest, db *sql.DB) (UpdateUserResponse, error) {
 
 	if req.OldPassword == "" {
-		return UpdateUserResponse{DESC: "UpdateUserPassword err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing Old Password")
+		return UpdateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Old Password")
 	}
 	if req.NewPassword == "" {
-		return UpdateUserResponse{DESC: "UpdateUserPassword err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing New Password")
+		return UpdateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing New Password")
 	}
 	// get user's password
 	var builtQuery = fmt.Sprintf(getUserPwdTemplate, req.EmployeeID)
 	pwd, err := getPwdQueryRes(builtQuery, db)
 	if err != nil {
-		return UpdateUserResponse{DESC: "UpdateUserPassword err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Couldn't fetch user's original password")
+		return UpdateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Couldn't fetch user's original password")
 	}
 	if pwd != req.OldPassword {
-		return UpdateUserResponse{DESC: "UpdateUserPassword err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Incorrect Original Password")
+		return UpdateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Incorrect Original Password")
 	}
 
 	var updateQuery = fmt.Sprintf(updateUserPwdTemplate, req.NewPassword, req.EmployeeID)
 	_, updateErr := db.ExecContext(ctx, updateQuery)
 
 	if updateErr != nil {
-		return UpdateUserResponse{DESC: "Could not update user password", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, updateErr
+		return UpdateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Could not update user password")
 	}
-	return UpdateUserResponse{DESC: "Updated user password", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return UpdateUserResponse{DESC: "Updated user password", OK: true}, nil
 }
 
 func getPwdQueryRes(builtQuery string, db *sql.DB) (string, error) {

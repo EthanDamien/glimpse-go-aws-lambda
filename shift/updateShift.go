@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/wage"
 )
 
@@ -33,25 +34,25 @@ UPDATE Shift SET ClockOutTime="%s", Earnings="%f", LastUpdated="%s" where ShiftE
 func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *sql.DB) (UpdateShiftResponse, error) {
 
 	if req.ShiftEventID == 0 {
-		return UpdateShiftResponse{DESC: "UpdateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ShiftEventID")
+		return UpdateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing ShiftEventID")
 	}
 	if req.ClockInTime.IsZero() {
-		return UpdateShiftResponse{DESC: "UpdateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockInTime")
+		return UpdateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing ClockInTime")
 	}
 	if req.ClockOutTime.IsZero() {
-		return UpdateShiftResponse{DESC: "UpdateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockOutTime")
+		return UpdateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing ClockOutTime")
 	}
 	if req.ClockInTime.After(req.ClockOutTime) {
-		return UpdateShiftResponse{DESC: "UpdateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("ClockInTime must be earlier than ClockOutTime")
+		return UpdateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "ClockInTime must be earlier than ClockOutTime")
 	}
 
 	var builtQuery = fmt.Sprintf(updateShiftTemplate, req.ClockInTime, req.ClockOutTime, req.Earnings, time.Now(), req.ShiftEventID)
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
-		return UpdateShiftResponse{DESC: "Could not update Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return UpdateShiftResponse{OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf(statuscode.C500, "UpdateShift Err")
 	}
-	return UpdateShiftResponse{DESC: "UpdateShift success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return UpdateShiftResponse{OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
 
 // This updates the shift if it exists, it takes in the employeeID, ShiftEventId, and ClockIn

@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type GetAllUsersRequest struct {
@@ -12,11 +13,9 @@ type GetAllUsersRequest struct {
 }
 
 type GetUserResponse struct {
-	RES   []User `json:"res"`
-	DESC  string `json:"desc"`
-	OK    bool   `json:"ok"`
-	ID    int64  `json:"id"`
-	ReqID string `json:"req_id"`
+	RES  []User `json:"res"`
+	DESC string `json:"desc"`
+	OK   bool   `json:"ok"`
 }
 
 type User struct {
@@ -34,10 +33,10 @@ func GetAllUsers(ctx context.Context, reqID string, req GetAllUsersRequest, db *
 	var builtQuery = fmt.Sprintf(getAllUsers, req.AdminID)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
-		return GetUserResponse{DESC: "Could not get shifts", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return GetUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Could not retrieve all users.")
 	}
 
-	return GetUserResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return GetUserResponse{RES: res, OK: true}, nil
 }
 
 func getQueryRes(builtQuery string, db *sql.DB) ([]User, error) {

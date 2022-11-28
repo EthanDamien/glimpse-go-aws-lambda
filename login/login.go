@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type Admin struct {
@@ -35,19 +36,15 @@ type AdminLoginRequest struct {
 }
 
 type EmployeeLoginResponse struct {
-	RES   []Employee `json:"res"`
-	DESC  string     `json:"desc"`
-	OK    bool       `json:"ok"`
-	ID    int64      `json:"id"`
-	ReqID string     `json:"req_id"`
+	RES  []Employee `json:"res"`
+	DESC string     `json:"desc"`
+	OK   bool       `json:"ok"`
 }
 
 type AdminLoginResponse struct {
-	RES   []Admin `json:"res"`
-	DESC  string  `json:"desc"`
-	OK    bool    `json:"ok"`
-	ID    int64   `json:"id"`
-	ReqID string  `json:"req_id"`
+	RES  []Admin `json:"res"`
+	DESC string  `json:"desc"`
+	OK   bool    `json:"ok"`
 }
 
 const employeeLogin = `SELECT EmployeeID, AdminID, Email, FirstName, LastName, Birthday, JobTitle FROM Employees WHERE Email = "%s" AND Password = "%s";`
@@ -56,41 +53,41 @@ const adminLogin = `SELECT AdminID, Email, Company_Name, AdminPIN FROM Admins WH
 
 func AdminLogin(ctx context.Context, reqID string, req AdminLoginRequest, db *sql.DB) (AdminLoginResponse, error) {
 	if req.Email == "" {
-		return AdminLoginResponse{DESC: "Could not get admin - missing Email", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing Email")
+		return AdminLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Email")
 	}
 	if req.Password == "" {
-		return AdminLoginResponse{DESC: "Could not get admin - missing Password", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing Password")
+		return AdminLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Password")
 	}
 
 	var query = fmt.Sprintf(adminLogin, req.Email, req.Password)
 	res, err := getQueryResAdmin(query, db)
 	if res == nil {
-		return AdminLoginResponse{DESC: "Could not get admin - incorrect email/password", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Incorrect Email and/or Password")
+		return AdminLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Incorrect Email and/or Password")
 	}
 	if err != nil {
-		return AdminLoginResponse{DESC: "Could not get admin", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return AdminLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Could not log in admin.")
 	}
-	return AdminLoginResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return AdminLoginResponse{RES: res, OK: true}, nil
 
 }
 
 func EmployeeLogin(ctx context.Context, reqID string, req EmployeeLoginRequest, db *sql.DB) (EmployeeLoginResponse, error) {
 	if req.Email == "" {
-		return EmployeeLoginResponse{DESC: "Could not get employee - missing Email", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing Email")
+		return EmployeeLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Email")
 	}
 	if req.Password == "" {
-		return EmployeeLoginResponse{DESC: "Could not get employee - missing Password", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Missing Password")
+		return EmployeeLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Password")
 	}
 
 	var query = fmt.Sprintf(employeeLogin, req.Email, req.Password)
 	res, err := getQueryResEmployee(query, db)
 	if res == nil {
-		return EmployeeLoginResponse{DESC: "Could not get employee - incorrect email/password", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf("Incorrect Email and/or Password")
+		return EmployeeLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Incorrect Email and/or Password")
 	}
 	if err != nil {
-		return EmployeeLoginResponse{DESC: "Could not get admin", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return EmployeeLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Could not log in employee")
 	}
-	return EmployeeLoginResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return EmployeeLoginResponse{RES: res, OK: true}, nil
 
 }
 

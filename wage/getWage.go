@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 // This query will get the first wage for the current interval (where it's time to set is <= clockIn Time)
@@ -29,7 +31,7 @@ func GetWageForCurrentInterval(ctx context.Context, db *sql.DB, EmployeeID strin
 	}
 
 	if len(res) != 1 {
-		return 0, fmt.Errorf("No Valid Wage Detected")
+		return 0, fmt.Errorf(statuscode.C500, "No Valid Wage Detected")
 	}
 
 	return float64(res[0].WagePerHour), nil

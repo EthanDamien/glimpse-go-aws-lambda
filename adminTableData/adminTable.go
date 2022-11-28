@@ -21,21 +21,15 @@ type GetAdminTableDataRes struct {
 
 func GetAdminTableData(ctx context.Context, reqID string, req GetAdminTableDataReq, db *sql.DB) (GetAdminTableDataRes, error) {
 	if req.AdminID == 0 {
-		return GetAdminTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("AdminID Missing")
+		return GetAdminTableDataRes{}, fmt.Errorf(statuscode.C500, "AdminID Missing")
 	}
 
 	if req.StartDate == "" {
-		return GetAdminTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("StartDate Missing")
+		return GetAdminTableDataRes{}, fmt.Errorf(statuscode.C500, "StartDate Missing")
 	}
 
 	if req.EndDate == "" {
-		return GetAdminTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("EndDate Missing")
+		return GetAdminTableDataRes{}, fmt.Errorf(statuscode.C500, "EndDate Missing")
 	}
 
 	var builtQuery = fmt.Sprintf(GetDataForInterval, req.AdminID, req.StartDate, req.EndDate)
@@ -43,14 +37,11 @@ func GetAdminTableData(ctx context.Context, reqID string, req GetAdminTableDataR
 	res, err := getQueryRes(builtQuery, db)
 
 	if err != nil {
-		return GetAdminTableDataRes{
-			StatusCode: statuscode.C500,
-		}, fmt.Errorf("Query Err")
+		return GetAdminTableDataRes{}, fmt.Errorf(statuscode.C500, "Query Err")
 	}
 
 	return GetAdminTableDataRes{
-		StatusCode: statuscode.C200,
-		RES:        res,
+		RES: res,
 	}, nil
 }
 

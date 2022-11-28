@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type CreateShiftRequest struct {
@@ -40,17 +42,17 @@ const checkActiveShiftTemplate = `select ShiftEventID, ClockInTime from Shift wh
 func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
 
 	if req.EmployeeID == 0 {
-		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing EmployeeID")
+		return CreateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing EmployeeID")
 	}
 	if req.ClockInTime.IsZero() {
-		return CreateShiftResponse{DESC: "CreateShift err", OK: false, ID: 0, ReqID: reqID}, fmt.Errorf("Missing ClockInTime")
+		return CreateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing ClockInTime")
 	}
 
 	var builtQuery = fmt.Sprintf(createShiftTemplate, req.EmployeeID, req.ClockInTime, req.ClockOutTime, req.Earnings, time.Now())
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
-		return CreateShiftResponse{DESC: "Could not insert into Shift Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, err
+		return CreateShiftResponse{OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf(statuscode.C500, "CreateShiftErr")
 	}
 	return CreateShiftResponse{DESC: "CreateShift success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }

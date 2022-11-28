@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type CreateAdminRequest struct {
@@ -22,16 +24,16 @@ func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *
 
 	//validate JSON
 	if req.Email == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing Email")
+		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing Email")
 	}
 	if req.Password == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing Password")
+		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing Password")
 	}
 	if req.Company_Name == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing Company Name")
+		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing Company Name")
 	}
 	if req.AdminPIN == "" {
-		return AdminResponse{DESC: "CreateAdmin err"}, fmt.Errorf("Status:500 Missing AdminPIN")
+		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing AdminPIN")
 	}
 
 	//Use the template and fill in the blanks
@@ -41,7 +43,7 @@ func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *
 	//If this fails, send "error" response
 	//TODO send actual error to Lambda
 	if err != nil {
-		return AdminResponse{DESC: "Could not insert into Admin Table"}, fmt.Errorf("Status:500 Internal server error")
+		return AdminResponse{OK: false}, fmt.Errorf(statuscode.C500, "Could not create new admin")
 	}
-	return AdminResponse{DESC: "Inserted into table"}, nil
+	return AdminResponse{DESC: "Inserted into table", OK: true}, nil
 }

@@ -26,28 +26,24 @@ func AttemptClockLog(ctx context.Context, reqID string, req AttemptClockLogReq, 
 	//validate JSON
 	if req.AdminID == "" {
 		return AttemptClockLogRes{
-			StatusCode: statuscode.C500,
-			Event:      "MissingAdminID",
-		}, fmt.Errorf("Missing AdminID")
+			Event: "MissingAdminID",
+		}, fmt.Errorf(statuscode.C500, "Missing AdminID")
 	}
 	if req.PictureMeta64 == "" {
 		return AttemptClockLogRes{
-			StatusCode: statuscode.C500,
-			Event:      "MissingImage",
-		}, fmt.Errorf("Missing Image")
+			Event: "MissingImage",
+		}, fmt.Errorf(statuscode.C500, "Missing Image")
 	}
 	employeeID, err := compare.FindMatchingEmployee(req.AdminID, req.PictureMeta64, db)
 	if err != nil {
 		if err.Error() == "Employee Not Found" {
 			//Return
 			return AttemptClockLogRes{
-				StatusCode: statuscode.C500,
-				Event:      "Employee Not Found",
+				Event: "Employee Not Found",
 			}, err
 		}
 		return AttemptClockLogRes{
-			StatusCode: statuscode.C500,
-			Event:      "Find Matching Employee Error",
+			Event: "Find Matching Employee Error",
 		}, err
 	}
 
@@ -55,13 +51,11 @@ func AttemptClockLog(ctx context.Context, reqID string, req AttemptClockLogReq, 
 	clockLog, err := shift.GenerateShiftorUpdate(ctx, strconv.Itoa(employeeID), db)
 	if err != nil {
 		return AttemptClockLogRes{
-			StatusCode: statuscode.C500,
-			Event:      "Error when Generating/updating shift",
+			Event: "Error when Generating/updating shift",
 		}, err
 	}
 
 	return AttemptClockLogRes{
-		StatusCode: statuscode.C200,
 		Event:      clockLog,
 		EmployeeID: employeeID,
 	}, nil

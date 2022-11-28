@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type EditWageRequest struct {
@@ -14,10 +16,8 @@ type EditWageRequest struct {
 }
 
 type EditWageResponse struct {
-	DESC  string `json:"desc"`
-	OK    bool   `json:"ok"`
-	ID    int64  `json:"id"`
-	ReqID string `json:"req_id"`
+	DESC string `json:"desc"`
+	OK   bool   `json:"ok"`
 }
 
 const editWageTemplate = `UPDATE Wage SET WagePerHour = %f, TimeToSet = "%s" WHERE WageEventID = %d;`
@@ -29,7 +29,7 @@ func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
-		return EditWageResponse{DESC: "EditWage err"}, fmt.Errorf("Couldn't edit wage")
+		return EditWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Couldn't edit wage")
 	}
 
 	return EditWageResponse{DESC: fmt.Sprintf("Wage successfully updated"), OK: true}, nil

@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
-	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type DeleteUserRequest struct {
@@ -13,10 +14,8 @@ type DeleteUserRequest struct {
 }
 
 type DeleteUserResponse struct {
-	DESC  string `json:"desc"`
-	OK    bool   `json:"ok"`
-	ID    int64  `json:"id"`
-	ReqID string `json:"req_id"`
+	DESC string `json:"desc"`
+	OK   bool   `json:"ok"`
 }
 
 const deleteUserTemplate = `DELETE FROM Employees WHERE EmployeeID IN (%s);`
@@ -28,7 +27,7 @@ func DeleteUser(ctx context.Context, reqID string, req DeleteUserRequest, db *sq
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
-		return DeleteUserResponse{DESC: "Could not delete employee from the Employees Table", OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+		return DeleteUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Delete employee failed.")
 	}
-	return DeleteUserResponse{DESC: "Delete user success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
+	return DeleteUserResponse{DESC: "Delete user success", OK: true}, nil
 }

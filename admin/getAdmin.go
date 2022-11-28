@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
 type GetAdminRequest struct {
@@ -54,13 +56,13 @@ func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB
 	}
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
-		return AdminResponse{DESC: "Error Querying Admins Table"}, fmt.Errorf("Could not query Admins")
+		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Could not query Admins")
 	}
 
 	var res string
 	rows.Next()
 	if err := rows.Scan(&res); err != nil {
-		return AdminResponse{DESC: "Error Converting to String"}, fmt.Errorf("SQL conversion to String error")
+		return AdminResponse{}, fmt.Errorf(statuscode.C500, "SQL conversion to String error")
 	}
 
 	return AdminResponse{DESC: res}, nil
@@ -68,11 +70,15 @@ func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB
 
 func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDRequest, db *sql.DB) (AdminIDResponse, error) {
 	//validate JSON
+	if req.AdminID == 0 {
+		return AdminIDResponse{}, fmt.Errorf(statuscode.C500, "No AdminID")
+	}
+
 	var query = ""
 	query = fmt.Sprintf(getSpecificAdminByID, req.AdminID)
 	res, err := getQueryRes(query, db)
 	if err != nil {
-		return AdminIDResponse{DESC: "Error Querying Admins Table"}, fmt.Errorf("Could not query Admins")
+		return AdminIDResponse{}, fmt.Errorf(statuscode.C500, "Could not query Admins")
 	}
 
 	return AdminIDResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil

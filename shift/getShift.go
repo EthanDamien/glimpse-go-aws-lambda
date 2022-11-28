@@ -28,9 +28,8 @@ type GetShiftRequest struct {
 }
 
 type GetShiftResponse struct {
-	StatusCode string  `json:"StatusCode"`
-	RES        []Shift `json:"RES"`
-	DESC       string  `json:"DESC"`
+	RES  []Shift `json:"RES"`
+	DESC string  `json:"DESC"`
 }
 
 type Shift struct {
@@ -67,97 +66,73 @@ ClockOutTime <= CAST("%s" as DATETIME)
 ORDER BY ShiftEventID DESC;`
 
 func GetMostRecentShifts(ctx context.Context, reqID string, req GetMostRecentShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
-
+	if req.AdminID == 0 {
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "Missing AdminID")
+	}
 	var builtQuery = fmt.Sprintf(getMostRecentShifts, req.AdminID)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
 		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts",
-		}, err
+			DESC: "Could not get shifts",
+		}, fmt.Errorf(statuscode.C500, "RecentShifts Err")
 	}
 
 	return GetShiftResponse{
-		StatusCode: statuscode.C200,
-		RES:        res,
+		RES: res,
 	}, nil
 }
 
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.FromDate.IsZero() {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts - missing FromDate",
-		}, fmt.Errorf("Missing FromDate")
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "Missing FromDate")
 	}
 	if req.ToDate.IsZero() {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts - missing ToDate",
-		}, fmt.Errorf("Missing ToDate")
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "Missing ToDate")
 	}
 
 	var builtQuery = fmt.Sprintf(getAllShiftsTemplate, req.FromDate, req.ToDate, req.AdminID)
 	res, err := getQueryRes(builtQuery, db)
 	if err != nil {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts",
-		}, err
+		return GetShiftResponse{}, err
 	}
 
 	return GetShiftResponse{
-		StatusCode: statuscode.C200,
-		RES:        res,
+		RES: res,
 	}, nil
 }
 
 func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.EmployeeID == 0 {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts - missing EmployeeID",
-		}, fmt.Errorf("Missing EmployeeID")
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "Missing EmployeeID")
 	}
 
 	var builtQuery = fmt.Sprintf(getEmployeeShiftsTemplate, req.EmployeeID)
 	res, err := getQueryRes(builtQuery, db)
 
 	if err != nil {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts",
-		}, err
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "GetEmployeeShifts err")
 	}
 	return GetShiftResponse{
-		StatusCode: statuscode.C200,
-		RES:        res,
+		RES: res,
 	}, nil
 }
 
 func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.ShiftEventID == 0 {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts - missing ShiftEventID",
-		}, fmt.Errorf("Missing ShiftEventID")
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "Missing ShiftEventID")
 	}
 
 	var builtQuery = fmt.Sprintf(getShiftTemplate, req.ShiftEventID)
 	res, err := getQueryRes(builtQuery, db)
 
 	if err != nil {
-		return GetShiftResponse{
-			StatusCode: statuscode.C500,
-			DESC:       "Could not get shifts",
-		}, err
+		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "GetShift err")
 	}
 	return GetShiftResponse{
-		StatusCode: statuscode.C200,
-		RES:        res,
+		RES: res,
 	}, nil
 }
 
