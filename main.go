@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
+	"github.com/EthanDamien/glimpse-go-aws-lambda/adminTableData"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/clockLog"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/compare"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
@@ -223,6 +224,12 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return employeeTableData.GetEmployeeTableData(ctx, reqID, dest, db)
+	case "getAdminTableData":
+		var dest adminTableData.GetAdminTableDataReq
+		if err := json.Unmarshal(req.Body, &dest); err != nil {
+			return nil, err
+		}
+		return adminTableData.GetAdminTableData(ctx, reqID, dest, db)
 	}
 	db.Close()
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
