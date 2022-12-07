@@ -9,14 +9,17 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for getting an admin by their email
 type GetAdminRequest struct {
 	Email string `json:"email"`
 }
 
+// request format for getting an admin by their ID
 type GetAdminByAdminIDRequest struct {
 	AdminID int `json:"adminID"`
 }
 
+// format for an Admin object
 type Admin struct {
 	AdminID      string `json:"AdminID"`
 	Email        string `json:"Email"`
@@ -25,6 +28,7 @@ type Admin struct {
 	AdminPIN     string `json:"AdminPIN"`
 }
 
+// response format for getting an admin by their ID
 type AdminIDResponse struct {
 	RES   Admin  `json:"res"`
 	DESC  string `json:"desc"`
@@ -46,6 +50,7 @@ const getSpecificAdminByID = `
 SELECT * from Admins WHERE AdminID = "%d";
 `
 
+// get an admin by their email
 func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB) (AdminResponse, error) {
 	//validate JSON
 	var query = ""
@@ -68,6 +73,7 @@ func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB
 	return AdminResponse{DESC: res}, nil
 }
 
+// get an admin by their ID
 func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDRequest, db *sql.DB) (AdminIDResponse, error) {
 	//validate JSON
 	if req.AdminID == 0 {
@@ -84,6 +90,7 @@ func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDR
 	return AdminIDResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
 
+// Perform query and return the admin
 func getQueryRes(builtQuery string, db *sql.DB) (Admin, error) {
 	rows, err := db.Query(builtQuery)
 

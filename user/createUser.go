@@ -8,6 +8,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for creating a user
 type CreateUserRequest struct {
 	AdminID   int    `json:"adminID"`
 	Email     string `json:"email"`
@@ -18,6 +19,7 @@ type CreateUserRequest struct {
 	JobTitle  string `json:"jobTitle"`
 }
 
+// response format for creating a user
 type CreateUserResponse struct {
 	DESC string `json:"desc"`
 	OK   bool   `json:"ok"`
@@ -27,6 +29,7 @@ const createUserTemplate = `
 Insert into Employees (EmployeeID, AdminID, Email, Password, FirstName, LastName, Birthday, JobTitle) 
 values (NULL, "%d", "%s", "%s", "%s", "%s", "%s", "%s");`
 
+// Create a user in the employee table
 func CreateUser(ctx context.Context, reqID string, req CreateUserRequest, db *sql.DB) (CreateUserResponse, error) {
 	if req.AdminID <= 0 {
 		return CreateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "adminID is missing")

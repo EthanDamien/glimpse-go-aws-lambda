@@ -9,12 +9,14 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for create wage
 type CreateWageRequest struct {
 	EmployeeID  int       `json:"EmployeeID"`
 	WagePerHour float64   `json:"WagePerHour"`
 	TimeToSet   time.Time `json:"TimeToSet"`
 }
 
+// response format for create wage
 type CreateWageResponse struct {
 	DESC string `json:"desc"`
 	OK   bool   `json:"ok"`
@@ -22,6 +24,7 @@ type CreateWageResponse struct {
 
 const createWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %d, %f, "%s"); `
 
+// Create wage for an employee
 func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sql.DB) (CreateWageResponse, error) {
 	if req.EmployeeID == 0 {
 		return CreateWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing EmployeeID")

@@ -8,16 +8,19 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for getting all employees
 type GetAllUsersRequest struct {
 	AdminID int `json:"adminID"`
 }
 
+// response format for getting all employees
 type GetUserResponse struct {
 	RES  []User `json:"res"`
 	DESC string `json:"desc"`
 	OK   bool   `json:"ok"`
 }
 
+// format of a User object
 type User struct {
 	Email      string `json:"email"`
 	FirstName  string `json:"firstName"`
@@ -28,6 +31,7 @@ type User struct {
 
 const getAllUsers = `SELECT e.Email, e.FirstName, e.LastName, e.JobTitle, e.EmployeeID FROM Employees e WHERE e.AdminID = %d;`
 
+// Get all users in the employee table
 func GetAllUsers(ctx context.Context, reqID string, req GetAllUsersRequest, db *sql.DB) (GetUserResponse, error) {
 
 	var builtQuery = fmt.Sprintf(getAllUsers, req.AdminID)
@@ -39,6 +43,7 @@ func GetAllUsers(ctx context.Context, reqID string, req GetAllUsersRequest, db *
 	return GetUserResponse{RES: res, OK: true}, nil
 }
 
+// Perform the query and return results
 func getQueryRes(builtQuery string, db *sql.DB) ([]User, error) {
 	rows, err := db.Query(builtQuery)
 
