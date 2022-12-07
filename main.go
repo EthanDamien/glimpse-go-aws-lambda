@@ -24,11 +24,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// response format for handling API calls
 type HandleResponse struct {
 	OK    bool   `json:"ok"`
 	ReqID string `json:"req_id"`
 }
 
+// request format for handling API calls
 type HandleRequest struct {
 	Event string          `json:"event"`
 	Body  json.RawMessage `json:"body"`
@@ -83,7 +85,6 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 
 	//This is the first row in the json request and will do certain things based on this variable
 	switch req.Event {
-	// EMPLOYEE
 	case "createUser":
 		var dest user.CreateUserRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
@@ -138,14 +139,6 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return login.AdminLogin(ctx, reqID, dest, db)
-	// SHIFT
-	case "clockingAction":
-		var dest shift.ClockingActionRequest
-		if err := json.Unmarshal(req.Body, &dest); err != nil {
-			return nil, err
-		}
-		// constant employeeID for now
-		return shift.ClockingAction(ctx, reqID, dest, 1, db)
 	case "createShift":
 		var dest shift.CreateShiftRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
@@ -235,6 +228,7 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 	return HandleResponse{OK: false, ReqID: reqID}, fmt.Errorf("%s is an unknown event", req.Event)
 }
 
+// starts the lambda
 func main() {
 	lambda.Start(Handle)
 }

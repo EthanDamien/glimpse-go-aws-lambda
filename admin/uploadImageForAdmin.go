@@ -8,6 +8,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for uploading the picture
 type UploadPictureRequest struct {
 	AdminID       string `json:"AdminID"`
 	EmployeeID    string `json:"EmployeeID"`

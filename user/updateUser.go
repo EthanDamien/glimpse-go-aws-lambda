@@ -8,12 +8,14 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for update user
 type UpdateUserPasswordRequest struct {
 	EmployeeID  int    `json:"employeeID"`
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
 }
 
+// response format for update user
 type UpdateUserResponse struct {
 	DESC string `json:"desc"`
 	OK   bool   `json:"ok"`
@@ -25,6 +27,7 @@ UPDATE Employees SET Password="%s" WHERE EmployeeID = "%d"`
 const getUserPwdTemplate = `
 SELECT Password FROM Employees WHERE EmployeeID = "%d"`
 
+// Update the password of a user in the employee table
 func UpdateUserPassword(ctx context.Context, reqID string, req UpdateUserPasswordRequest, db *sql.DB) (UpdateUserResponse, error) {
 
 	if req.OldPassword == "" {
@@ -42,7 +45,7 @@ func UpdateUserPassword(ctx context.Context, reqID string, req UpdateUserPasswor
 	if pwd != req.OldPassword {
 		return UpdateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "Incorrect Original Password")
 	}
-
+	// update the table
 	var updateQuery = fmt.Sprintf(updateUserPwdTemplate, req.NewPassword, req.EmployeeID)
 	_, updateErr := db.ExecContext(ctx, updateQuery)
 
@@ -52,6 +55,7 @@ func UpdateUserPassword(ctx context.Context, reqID string, req UpdateUserPasswor
 	return UpdateUserResponse{DESC: "Updated user password", OK: true}, nil
 }
 
+// Perform the query and return the password
 func getPwdQueryRes(builtQuery string, db *sql.DB) (string, error) {
 	rows, err := db.Query(builtQuery)
 

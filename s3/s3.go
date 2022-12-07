@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
+// credentials
 const (
 	AWS_S3_REGION         = "us-east-1" // Region
 	AWS_S3_BUCKET         = "facefiles" // Bucket
@@ -15,6 +16,7 @@ const (
 	AWS_ACCESS_KEY_ID     = "AKIA42VSILKBI7OAOK4N"
 )
 
+// connect to AWS
 func ConnectAws() *session.Session {
 	sess, err := session.NewSession(
 		&aws.Config{

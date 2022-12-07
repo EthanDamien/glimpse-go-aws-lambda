@@ -8,6 +8,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for creating an admin
 type CreateAdminRequest struct {
 	Email        string `json:"email"`
 	Password     string `json:"password"`
@@ -15,14 +16,15 @@ type CreateAdminRequest struct {
 	AdminPIN     string `json:"adminPin"`
 }
 
-// Template to be used to insert to Table
+// template to be used to insert to Table
 const createAdminTemplate = `
 Insert into Admins (AdminID, Email, Password, Company_Name, AdminPin) 
 values (NULL, "%s", "%s", "%s", "%s");`
 
+// create an admin in the admin table
 func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *sql.DB) (AdminResponse, error) {
 
-	//validate JSON
+	// validate JSON
 	if req.Email == "" {
 		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing Email")
 	}
@@ -36,12 +38,11 @@ func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *
 		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing AdminPIN")
 	}
 
-	//Use the template and fill in the blanks
+	// Use the template and fill in the blanks
 	var builtQuery = fmt.Sprintf(createAdminTemplate, req.Email, req.Password, req.Company_Name, req.AdminPIN)
 	_, err := db.ExecContext(ctx, builtQuery)
 
-	//If this fails, send "error" response
-	//TODO send actual error to Lambda
+	// If this fails, send "error" response
 	if err != nil {
 		return AdminResponse{OK: false}, fmt.Errorf(statuscode.C500, "Could not create new admin")
 	}
