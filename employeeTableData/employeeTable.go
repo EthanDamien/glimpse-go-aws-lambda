@@ -8,10 +8,12 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// This struct is the request for the Employee Table Data
 type GetEmployeeTableDataReq struct {
 	EmployeeID int `json:"employeeID"`
 }
 
+// this is the struct for the Employee Table Data Result
 type GetEmployeeTableDataRes struct {
 	MinutesForWeek   int     `json:"MinutesForWeek"`
 	MinutesForMonth  int     `json:"MinutesForMonth"`
@@ -21,6 +23,7 @@ type GetEmployeeTableDataRes struct {
 	EarningsForYear  float64 `json:"EarningsForYear"`
 }
 
+// This function gets the Employee Table Data
 func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTableDataReq, db *sql.DB) (GetEmployeeTableDataRes, error) {
 	if req.EmployeeID == 0 {
 		return GetEmployeeTableDataRes{}, fmt.Errorf(statuscode.C500, "EmployeeID Missing")
@@ -77,6 +80,7 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 	}, nil
 }
 
+// get query result for EmployeeTable Data
 func getQueryRes(builtQuery string, db *sql.DB) ([]employeeTableData, error) {
 	rows, err := db.Query(builtQuery)
 

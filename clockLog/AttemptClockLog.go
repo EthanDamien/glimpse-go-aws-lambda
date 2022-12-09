@@ -11,17 +11,20 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// type for clock log response
 type AttemptClockLogRes struct {
 	StatusCode string `json:"StatusCode"`
 	Event      string `json:"Event"`
 	EmployeeID int    `json:"EmployeeID"`
 }
 
+// type for Clock Log request
 type AttemptClockLogReq struct {
 	AdminID       string `json:"AdminID"`
 	PictureMeta64 string `json:"PictureMeta64"`
 }
 
+// this attempts to clock in using the admin id and the image that was sent through the api
 func AttemptClockLog(ctx context.Context, reqID string, req AttemptClockLogReq, db *sql.DB) (AttemptClockLogRes, error) {
 	//validate JSON
 	if req.AdminID == "" {

@@ -30,6 +30,7 @@ from (
     ) as YearData
 group by EmployeeID;`
 
+// This is used to fill the data when query is done
 type employeeTableData struct {
 	EmployeeID int     `json:"EmployeeID"`
 	Minutes    int     `json:"Minutes"`
