@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+// This function uploads the image using the required data
 func UploadImage(base64Meta string, location string, bucket string) error {
 	base64data := base64Meta[strings.IndexByte(base64Meta, ',')+1:]
 	decodedImage, err := base64.StdEncoding.DecodeString(base64data)
@@ -40,6 +41,7 @@ func UploadImage(base64Meta string, location string, bucket string) error {
 	return nil
 }
 
+// this deletes an object for Upload using the location
 func deleteObjectForUpload(sess *session.Session, location string) {
 	svc := s3.New(sess)
 

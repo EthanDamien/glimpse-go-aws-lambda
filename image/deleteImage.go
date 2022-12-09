@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+// this deletes an image with the location name in s3
 func DeleteImage(location string) {
 	sess := session.New()
 	svc := s3.New(sess)
