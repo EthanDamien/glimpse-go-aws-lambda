@@ -9,11 +9,9 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/admin"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/adminTableData"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/clockLog"
-	"github.com/EthanDamien/glimpse-go-aws-lambda/compare"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/database"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/employeeTableData"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/login"
-	"github.com/EthanDamien/glimpse-go-aws-lambda/s3"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/shift"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/user"
 	"github.com/EthanDamien/glimpse-go-aws-lambda/wage"
@@ -76,10 +74,6 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 
 	//Initialize Database
 	initDatabaseConnection()
-
-	//Connect to s3
-	awsSession := s3.ConnectAws()
-	logger.Info(*awsSession.Config.Region)
 
 	//This is the first row in the json request and will do certain things based on this variable
 	switch req.Event {
@@ -182,12 +176,6 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return shift.GetEmployeeShifts(ctx, reqID, dest, db)
-	case "testCompare":
-		var dest compare.CompareReq
-		if err := json.Unmarshal(req.Body, &dest); err != nil {
-			return nil, err
-		}
-		return compare.TestCompare(ctx, reqID, dest, db)
 	case "uploadImageForAdmin":
 		var dest admin.UploadPictureRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {
