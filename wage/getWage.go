@@ -19,6 +19,7 @@ type WagePerHour struct {
 	WagePerHour float64 `json:"WagePerHour"`
 }
 
+// gets the wage for a given interval, error otherwise
 func GetWageForCurrentInterval(ctx context.Context, db *sql.DB, EmployeeID string, ClockIn time.Time) (float64, error) {
 	//Get Shift clockInTime
 	//Get Valid Wage
@@ -37,6 +38,7 @@ func GetWageForCurrentInterval(ctx context.Context, db *sql.DB, EmployeeID strin
 	return float64(res[0].WagePerHour), nil
 }
 
+// gets database query results for wage given employee and time interval
 func getQueryRes(builtQuery string, db *sql.DB) ([]WagePerHour, error) {
 	rows, err := db.Query(builtQuery)
 

@@ -22,8 +22,9 @@ type EditWageResponse struct {
 
 const editWageTemplate = `UPDATE Wage SET WagePerHour = %f, TimeToSet = "%s" WHERE WageEventID = %d;`
 
-//TODO: Edit wage
-
+// returns a status code 200 response if the wage for a given employee
+// (based on wageEventID) was successfully updated with a description
+// returns a status code 500 response if there was an error
 func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB) (EditWageResponse, error) {
 	var builtQuery = fmt.Sprintf(editWageTemplate, req.WagePerHour, req.TimeToSet, req.WageEventID)
 	_, err := db.ExecContext(ctx, builtQuery)

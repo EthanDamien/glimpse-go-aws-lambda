@@ -51,6 +51,8 @@ const employeeLogin = `SELECT EmployeeID, AdminID, Email, FirstName, LastName, B
 
 const adminLogin = `SELECT AdminID, Email, Company_Name, AdminPIN FROM Admins WHERE Email = "%s" AND Password = "%s";`
 
+// this function returns a status code 200 response if admin successfully logs in
+// returns status code 500 for all errors with an appropriate error message
 func AdminLogin(ctx context.Context, reqID string, req AdminLoginRequest, db *sql.DB) (AdminLoginResponse, error) {
 	if req.Email == "" {
 		return AdminLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Email")
@@ -71,6 +73,8 @@ func AdminLogin(ctx context.Context, reqID string, req AdminLoginRequest, db *sq
 
 }
 
+// returns a status code 200 response if employee successfully logs in
+// returns status code 500 for all errors with an appropriate error message
 func EmployeeLogin(ctx context.Context, reqID string, req EmployeeLoginRequest, db *sql.DB) (EmployeeLoginResponse, error) {
 	if req.Email == "" {
 		return EmployeeLoginResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Email")
@@ -91,6 +95,7 @@ func EmployeeLogin(ctx context.Context, reqID string, req EmployeeLoginRequest, 
 
 }
 
+// gets database query results for admin login query
 func getQueryResAdmin(builtQuery string, db *sql.DB) ([]Admin, error) {
 	rows, err := db.Query(builtQuery)
 
@@ -111,6 +116,7 @@ func getQueryResAdmin(builtQuery string, db *sql.DB) ([]Admin, error) {
 	return adminInfo, nil
 }
 
+// gets database results for employee login query
 func getQueryResEmployee(builtQuery string, db *sql.DB) ([]Employee, error) {
 	rows, err := db.Query(builtQuery)
 

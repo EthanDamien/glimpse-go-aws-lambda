@@ -9,7 +9,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
-// This query will get the first wage for the current interval (where it's time to set is <= clockIn Time)
+// This query will get all the unique wages an employee ever had at the company
 const getWagesForEmployee = `
 select WageEventID, EmployeeID, WagePerHour, TimeToSet from Wage 
 where EmployeeId = %d 
@@ -32,6 +32,8 @@ type GetWageResponse struct {
 	OK   bool       `json:"ok"`
 }
 
+// returns status code 200 response with all wage for information for an employee
+// returns status code 500 response if there's an error
 func GetWagesForEmployees(ctx context.Context, reqID string, req GetWageRequest, db *sql.DB) (GetWageResponse, error) {
 	// Get all wages for an employee
 	if req.EmployeeID == 0 {
@@ -49,6 +51,7 @@ func GetWagesForEmployees(ctx context.Context, reqID string, req GetWageRequest,
 
 }
 
+// gets database query results for all wage information for an employee
 func getQueryResult(builtQuery string, db *sql.DB) ([]WageInfo, error) {
 	rows, err := db.Query(builtQuery)
 
