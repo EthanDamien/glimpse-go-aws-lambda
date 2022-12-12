@@ -28,7 +28,8 @@ const editWageTemplate = `UPDATE Wage SET WagePerHour = %f, TimeToSet = "%s" WHE
 // (based on wageEventID) was successfully updated with a description
 // returns a status code 500 response and an error if there was an error
 func EditWage(ctx context.Context, reqID string, req EditWageRequest, db *sql.DB) (EditWageResponse, error) {
-	var builtQuery = fmt.Sprintf(editWageTemplate, req.WagePerHour, req.TimeToSet, req.WageEventID)
+	loc, _ := time.LoadLocation("EST")
+	var builtQuery = fmt.Sprintf(editWageTemplate, req.WagePerHour, req.TimeToSet.In(loc), req.WageEventID)
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {

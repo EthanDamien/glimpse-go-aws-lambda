@@ -134,12 +134,6 @@ func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 			return nil, err
 		}
 		return login.AdminLogin(ctx, reqID, dest, db)
-	case "createShift":
-		var dest shift.CreateShiftRequest
-		if err := json.Unmarshal(req.Body, &dest); err != nil {
-			return nil, err
-		}
-		return shift.CreateShift(ctx, reqID, dest, db)
 	case "updateShift":
 		var dest shift.UpdateShiftRequest
 		if err := json.Unmarshal(req.Body, &dest); err != nil {

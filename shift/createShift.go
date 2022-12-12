@@ -6,60 +6,19 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-
-	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
-// request format for creating a shift
-type CreateShiftRequest struct {
-	EmployeeID   int       `json:"employeeID"`
-	ClockInTime  time.Time `json:"clockInTime"`
-	ClockOutTime time.Time `json:"clockOutTime"`
-	Earnings     float32   `json:"earnings"`
-}
-
-// response format for creating a shift
-type CreateShiftResponse struct {
-	DESC  string `json:"desc"`
-	OK    bool   `json:"ok"`
-	ID    int64  `json:"id"`
-	ReqID string `json:"req_id"`
-}
-
+// check Shift Struct for checking shift
 type checkShift struct {
 	ShiftEventID int       `json:"shiftEventID"`
 	ClockInTime  time.Time `json:"clockInTime"`
 }
-
-const createShiftTemplate = `
-Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated) 
-values (NULL, %d, "%s", "%s", %f, "%s");`
 
 const createShiftTemplateForClockIn = `
 Insert into Shift (ShiftEventID, EmployeeID, ClockInTime, ClockOutTime, Earnings, LastUpdated) 
 values (NULL, %d, "%s", CAST("0000-00-00 00:00:00" as DATETIME), 0, "%s");`
 
 const checkActiveShiftTemplate = `select ShiftEventID, ClockInTime from Shift where EmployeeID = %s and ClockOutTime = CAST("0000-00-00 00:00:00" as DATETIME)`
-
-// create a new shift for an employee
-// return CreateShiftResponse if successful, else error
-func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
-
-	if req.EmployeeID == 0 {
-		return CreateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing EmployeeID")
-	}
-	if req.ClockInTime.IsZero() {
-		return CreateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "Missing ClockInTime")
-	}
-
-	var builtQuery = fmt.Sprintf(createShiftTemplate, req.EmployeeID, req.ClockInTime, req.ClockOutTime, req.Earnings, time.Now())
-	_, err := db.ExecContext(ctx, builtQuery)
-
-	if err != nil {
-		return CreateShiftResponse{OK: false, ID: time.Now().UnixNano(), ReqID: reqID}, fmt.Errorf(statuscode.C500, "CreateShiftErr")
-	}
-	return CreateShiftResponse{DESC: "CreateShift success", OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
-}
 
 // This function will update the generate a shift if it doesn't exist, otherwise, it will modify the
 // active shift
