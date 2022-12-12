@@ -10,6 +10,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/wage"
 )
 
+// request format for updating a shift
 type UpdateShiftRequest struct {
 	ShiftEventID int       `json:"shiftEventID"`
 	EmployeeID   int       `json:"employeeID"`
@@ -18,6 +19,7 @@ type UpdateShiftRequest struct {
 	Earnings     float32   `json:"earnings"`
 }
 
+// response format for updating a shift
 type UpdateShiftResponse struct {
 	DESC  string `json:"desc"`
 	OK    bool   `json:"ok"`
@@ -31,6 +33,8 @@ UPDATE Shift SET ClockInTime="%s", ClockOutTime="%s", Earnings="%f", LastUpdated
 const updateShiftForClockoutTemplate = `
 UPDATE Shift SET ClockOutTime="%s", Earnings="%f", LastUpdated="%s" where ShiftEventID = %s;`
 
+// updates a shift
+// returns UpdateShiftResponse instance if successful, else error
 func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *sql.DB) (UpdateShiftResponse, error) {
 
 	if req.ShiftEventID == 0 {

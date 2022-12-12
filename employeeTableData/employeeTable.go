@@ -24,6 +24,7 @@ type GetEmployeeTableDataRes struct {
 }
 
 // This function gets the Employee Table Data
+// return GetEmployeeTableDataRes instance if successful, else error
 func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTableDataReq, db *sql.DB) (GetEmployeeTableDataRes, error) {
 	if req.EmployeeID == 0 {
 		return GetEmployeeTableDataRes{}, fmt.Errorf(statuscode.C500, "EmployeeID Missing")
@@ -81,6 +82,7 @@ func GetEmployeeTableData(ctx context.Context, reqID string, req GetEmployeeTabl
 }
 
 // get query result for EmployeeTable Data
+// return array of employeeTableData objects if successful, else error
 func getQueryRes(builtQuery string, db *sql.DB) ([]employeeTableData, error) {
 	rows, err := db.Query(builtQuery)
 

@@ -8,17 +8,21 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for getting admin table data
 type GetAdminTableDataReq struct {
 	AdminID   int    `json:"adminID"`
 	StartDate string `json:"startDate"`
 	EndDate   string `json:"endDate"`
 }
 
+// response format for getting admin table data
 type GetAdminTableDataRes struct {
 	StatusCode string           `json:"StatusCode"`
 	RES        []AdminTableData `json:"AdminTableData"`
 }
 
+// get data and statistics for admin dashboard
+// return GetAdminTableDataRes instance if successful, else error
 func GetAdminTableData(ctx context.Context, reqID string, req GetAdminTableDataReq, db *sql.DB) (GetAdminTableDataRes, error) {
 	if req.AdminID == 0 {
 		return GetAdminTableDataRes{}, fmt.Errorf(statuscode.C500, "AdminID Missing")
@@ -45,6 +49,8 @@ func GetAdminTableData(ctx context.Context, reqID string, req GetAdminTableDataR
 	}, nil
 }
 
+// perform query and return result
+// return an array of AdminTableData instances if successful, else error
 func getQueryRes(builtQuery string, db *sql.DB) ([]AdminTableData, error) {
 	rows, err := db.Query(builtQuery)
 

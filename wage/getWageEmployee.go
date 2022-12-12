@@ -15,6 +15,7 @@ select WageEventID, EmployeeID, WagePerHour, TimeToSet from Wage
 where EmployeeId = %d 
 order by TimeToSet desc;`
 
+// struct for getting wage information
 type WageInfo struct {
 	WageEventID int       `json:"WageEventID"`
 	EmployeeID  int       `json:"EmployeeID"`
@@ -22,18 +23,20 @@ type WageInfo struct {
 	TimeToSet   time.Time `json:"TimeToSet"`
 }
 
+// request format for getting a wage
 type GetWageRequest struct {
 	EmployeeID int `json:"EmployeeID"`
 }
 
+// response format for getting a wage
 type GetWageResponse struct {
 	RES  []WageInfo `json:"res"`
 	DESC string     `json:"desc"`
 	OK   bool       `json:"ok"`
 }
 
-// returns status code 200 response with all wage for information for an employee
-// returns status code 500 response if there's an error
+// returns status code 200 response and a GetWageResponse instance with all wage information for an employee
+// returns status code 500 response and an error if there's an error
 func GetWagesForEmployees(ctx context.Context, reqID string, req GetWageRequest, db *sql.DB) (GetWageResponse, error) {
 	// Get all wages for an employee
 	if req.EmployeeID == 0 {
@@ -52,6 +55,7 @@ func GetWagesForEmployees(ctx context.Context, reqID string, req GetWageRequest,
 }
 
 // gets database query results for all wage information for an employee
+// return an array of WageInfo instances if successful, else error
 func getQueryResult(builtQuery string, db *sql.DB) ([]WageInfo, error) {
 	rows, err := db.Query(builtQuery)
 

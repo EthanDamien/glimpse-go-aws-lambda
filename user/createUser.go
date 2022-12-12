@@ -30,6 +30,7 @@ Insert into Employees (EmployeeID, AdminID, Email, Password, FirstName, LastName
 values (NULL, "%d", "%s", "%s", "%s", "%s", "%s", "%s");`
 
 // Create a user in the employee table
+// returns CreateUserResponse instance if successful, else error
 func CreateUser(ctx context.Context, reqID string, req CreateUserRequest, db *sql.DB) (CreateUserResponse, error) {
 	if req.AdminID <= 0 {
 		return CreateUserResponse{OK: false}, fmt.Errorf(statuscode.C500, "adminID is missing")

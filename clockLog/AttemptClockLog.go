@@ -25,6 +25,7 @@ type AttemptClockLogReq struct {
 }
 
 // this attempts to clock in using the admin id and the image that was sent through the api
+// return an AttemptClockLogRes instance if successful, else error
 func AttemptClockLog(ctx context.Context, reqID string, req AttemptClockLogReq, db *sql.DB) (AttemptClockLogRes, error) {
 	//validate JSON
 	if req.AdminID == "" {

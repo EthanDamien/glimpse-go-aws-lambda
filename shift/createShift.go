@@ -10,6 +10,7 @@ import (
 	"github.com/EthanDamien/glimpse-go-aws-lambda/statuscode"
 )
 
+// request format for creating a shift
 type CreateShiftRequest struct {
 	EmployeeID   int       `json:"employeeID"`
 	ClockInTime  time.Time `json:"clockInTime"`
@@ -17,6 +18,7 @@ type CreateShiftRequest struct {
 	Earnings     float32   `json:"earnings"`
 }
 
+// response format for creating a shift
 type CreateShiftResponse struct {
 	DESC  string `json:"desc"`
 	OK    bool   `json:"ok"`
@@ -39,6 +41,8 @@ values (NULL, %d, "%s", CAST("0000-00-00 00:00:00" as DATETIME), 0, "%s");`
 
 const checkActiveShiftTemplate = `select ShiftEventID, ClockInTime from Shift where EmployeeID = %s and ClockOutTime = CAST("0000-00-00 00:00:00" as DATETIME)`
 
+// create a new shift for an employee
+// return CreateShiftResponse if successful, else error
 func CreateShift(ctx context.Context, reqID string, req CreateShiftRequest, db *sql.DB) (CreateShiftResponse, error) {
 
 	if req.EmployeeID == 0 {
@@ -93,6 +97,8 @@ func GenerateShiftorUpdate(ctx context.Context, employeeID string, db *sql.DB) (
 	return "", nil
 }
 
+// create a new shift if an employee is clocking in
+// return nil if successful, else error
 func GenerateShiftForClockIn(ctx context.Context, employeeID string, db *sql.DB) error {
 	employeeIDAsInt, err := strconv.Atoi(employeeID)
 	if err != nil {
@@ -132,6 +138,8 @@ func checkForActiveShift(ctx context.Context, employeeID string, db *sql.DB) (bo
 
 }
 
+// execute query
+// return an array of checkShift objects if successful, else error
 func getCheckShiftQueryRes(builtQuery string, db *sql.DB) ([]checkShift, error) {
 	rows, err := db.Query(builtQuery)
 

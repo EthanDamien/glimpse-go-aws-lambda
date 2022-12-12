@@ -14,6 +14,7 @@ import (
 )
 
 // This function uploads the image using the required data
+// return nil if successful, else error
 func UploadImage(base64Meta string, location string, bucket string) error {
 	base64data := base64Meta[strings.IndexByte(base64Meta, ',')+1:]
 	decodedImage, err := base64.StdEncoding.DecodeString(base64data)

@@ -32,6 +32,7 @@ type User struct {
 const getAllUsers = `SELECT e.Email, e.FirstName, e.LastName, e.JobTitle, e.EmployeeID FROM Employees e WHERE e.AdminID = %d;`
 
 // Get all users in the employee table
+// returns GetUserResponse if successful, else error
 func GetAllUsers(ctx context.Context, reqID string, req GetAllUsersRequest, db *sql.DB) (GetUserResponse, error) {
 
 	var builtQuery = fmt.Sprintf(getAllUsers, req.AdminID)
@@ -44,6 +45,7 @@ func GetAllUsers(ctx context.Context, reqID string, req GetAllUsersRequest, db *
 }
 
 // Perform the query and return results
+// return an array of User instances, else error
 func getQueryRes(builtQuery string, db *sql.DB) ([]User, error) {
 	rows, err := db.Query(builtQuery)
 

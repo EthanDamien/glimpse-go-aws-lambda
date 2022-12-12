@@ -25,6 +25,7 @@ type CreateWageResponse struct {
 const createWageTemplate = `Insert into Wage (WageEventID, EmployeeID, WagePerHour, TimeToSet) values (NULL, %d, %f, "%s"); `
 
 // Create wage for an employee
+// return CreateWageResponse instance if successful, else error
 func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sql.DB) (CreateWageResponse, error) {
 	if req.EmployeeID == 0 {
 		return CreateWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing EmployeeID")

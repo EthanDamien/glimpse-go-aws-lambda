@@ -28,6 +28,7 @@ const getUserPwdTemplate = `
 SELECT Password FROM Employees WHERE EmployeeID = "%d"`
 
 // Update the password of a user in the employee table
+// return UpdateUserResponse if successful, else error
 func UpdateUserPassword(ctx context.Context, reqID string, req UpdateUserPasswordRequest, db *sql.DB) (UpdateUserResponse, error) {
 
 	if req.OldPassword == "" {
@@ -56,6 +57,7 @@ func UpdateUserPassword(ctx context.Context, reqID string, req UpdateUserPasswor
 }
 
 // Perform the query and return the password
+// return string if successful, else error
 func getPwdQueryRes(builtQuery string, db *sql.DB) (string, error) {
 	rows, err := db.Query(builtQuery)
 

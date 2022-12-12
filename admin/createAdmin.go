@@ -22,6 +22,7 @@ Insert into Admins (AdminID, Email, Password, Company_Name, AdminPin)
 values (NULL, "%s", "%s", "%s", "%s");`
 
 // create an admin in the admin table
+// return AdminResponse instance if successful, else error
 func CreateAdmin(ctx context.Context, reqID string, req CreateAdminRequest, db *sql.DB) (AdminResponse, error) {
 
 	// validate JSON
