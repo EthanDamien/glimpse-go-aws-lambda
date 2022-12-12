@@ -51,6 +51,7 @@ SELECT * from Admins WHERE AdminID = "%d";
 `
 
 // get an admin by their email
+// return AdminResponse instance if successful, else error
 func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB) (AdminResponse, error) {
 	//validate JSON
 	var query = ""
@@ -74,6 +75,7 @@ func GetAdmin(ctx context.Context, reqID string, req GetAdminRequest, db *sql.DB
 }
 
 // get an admin by their ID
+// return AdminIDResponse instance if successful, else error
 func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDRequest, db *sql.DB) (AdminIDResponse, error) {
 	//validate JSON
 	if req.AdminID == 0 {
@@ -90,7 +92,8 @@ func GetAdminByAdminID(ctx context.Context, reqID string, req GetAdminByAdminIDR
 	return AdminIDResponse{RES: res, OK: true, ID: time.Now().UnixNano(), ReqID: reqID}, nil
 }
 
-// Perform query and return the admin
+// Perform query
+// return Admin instance if successful, else error
 func getQueryRes(builtQuery string, db *sql.DB) (Admin, error) {
 	rows, err := db.Query(builtQuery)
 

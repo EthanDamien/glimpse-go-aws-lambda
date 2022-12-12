@@ -65,6 +65,8 @@ ClockOutTime >= CAST("%s" as DATETIME) and
 ClockOutTime <= CAST("%s" as DATETIME) 
 ORDER BY ShiftEventID DESC;`
 
+// gets the most recent shifts of employees under an admin
+// returns GetShiftResponse instance if successful, else error
 func GetMostRecentShifts(ctx context.Context, reqID string, req GetMostRecentShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 	if req.AdminID == 0 {
 		return GetShiftResponse{}, fmt.Errorf(statuscode.C500, "Missing AdminID")
@@ -82,6 +84,8 @@ func GetMostRecentShifts(ctx context.Context, reqID string, req GetMostRecentShi
 	}, nil
 }
 
+// gets all shifts within a certain time range of an admin
+// returns GetShiftResponse instance if successful, else error
 func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.FromDate.IsZero() {
@@ -102,6 +106,8 @@ func GetAllShifts(ctx context.Context, reqID string, req GetAllShiftsRequest, db
 	}, nil
 }
 
+// gets all shifts of an employee
+// returns GetShiftResponse instance if successful, else error
 func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.EmployeeID == 0 {
@@ -119,6 +125,8 @@ func GetEmployeeShifts(ctx context.Context, reqID string, req GetEmployeeShiftsR
 	}, nil
 }
 
+// gets a shift by ID
+// returns GetShiftResponse instance if successful, else error
 func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB) (GetShiftResponse, error) {
 
 	if req.ShiftEventID == 0 {
@@ -136,6 +144,8 @@ func GetShift(ctx context.Context, reqID string, req GetShiftRequest, db *sql.DB
 	}, nil
 }
 
+// perform query
+// returns an array of Shift objects if successful, else error
 func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {
 	rows, err := db.Query(builtQuery)
 
@@ -157,6 +167,8 @@ func getQueryRes(builtQuery string, db *sql.DB) ([]Shift, error) {
 	return shifts, nil
 }
 
+// calculates earnings within time interval
+// returns a float
 func GetEarnings(pastTime time.Time, forwardTime time.Time, wage float64) float64 {
 	diffInHours := forwardTime.Sub(pastTime).Hours()
 	return wage * diffInHours

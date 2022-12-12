@@ -19,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+// struct for EmployeeID
 type EmployeeID struct {
 	EmployeeID int `json:"employeeID"`
 }
@@ -27,6 +28,7 @@ type EmployeeID struct {
 const findEmployeesPerAdminIDTemplate = `SELECT EmployeeID from Employees where AdminID = "%s";`
 
 // Using json input, find a matching employee for the given adminID, and image.
+// return employeeID if found, else error
 func FindMatchingEmployee(AdminId string, PictureMeta64 string, db *sql.DB) (int, error) {
 
 	//create random image name and upload it
@@ -60,6 +62,8 @@ func FindMatchingEmployee(AdminId string, PictureMeta64 string, db *sql.DB) (int
 	return 0, fmt.Errorf(statuscode.C500, "Employee Not Found")
 }
 
+// perform query
+// return an array of EmployeeID instances if successful, else error
 func getQueryRes(builtQuery string, db *sql.DB) ([]EmployeeID, error) {
 	rows, err := db.Query(builtQuery)
 
@@ -80,6 +84,8 @@ func getQueryRes(builtQuery string, db *sql.DB) ([]EmployeeID, error) {
 	return employeeIDs, nil
 }
 
+// upload picture to S3
+// return true (picture uploaded) or false (picture not uploaded) if query performed, else error
 func uploadPicture(base64Meta string, location string, bucket string) (bool, error) {
 	base64data := base64Meta[strings.IndexByte(base64Meta, ',')+1:]
 	decodedImage, err := base64.StdEncoding.DecodeString(base64data)
@@ -107,6 +113,7 @@ func uploadPicture(base64Meta string, location string, bucket string) (bool, err
 	return true, nil
 }
 
+// delete object from S3
 func deleteObject(sess *session.Session, location string) {
 	svc := s3.New(sess)
 

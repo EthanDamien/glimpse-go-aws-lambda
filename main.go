@@ -62,6 +62,7 @@ func initDatabaseConnection() {
 }
 
 // Handle the calls
+// returns an interface object if successful, else error
 func Handle(ctx context.Context, req HandleRequest) (interface{}, error) {
 	var reqID string
 	if lc, ok := lambdacontext.FromContext(ctx); ok {

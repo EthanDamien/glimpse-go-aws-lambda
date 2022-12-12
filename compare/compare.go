@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+// struct for comparison request
 type CompareReq struct {
 	Loc1 string `json:"loc1"`
 	Loc2 string `json:"loc2"`
@@ -18,6 +19,7 @@ type CompareReq struct {
 
 // this compare function returns true if the picture matches, if not, returns false.
 // All other errors also return false. The CompareFacesOutput is also returned for visibility.
+// return a boolean, an error, and a CompareFacesOutput instance
 func Compare(location1 string, location2 string) (bool, error, rekognition.CompareFacesOutput) {
 
 	sess := session.New(&aws.Config{
@@ -97,6 +99,8 @@ func Compare(location1 string, location2 string) (bool, error, rekognition.Compa
 	return true, nil, *result
 }
 
+// checks to see if the key exists in S3
+// return true (found) or false (not found) if query performed successfully, else error
 func keyExists(bucket string, key string, sess *session.Session) (bool, error) {
 	svc := s3.New(sess)
 

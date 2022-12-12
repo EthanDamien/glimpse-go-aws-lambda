@@ -15,11 +15,12 @@ select WagePerHour from Wage
 where EmployeeId = %s and TimeToSet <= CAST("%s" as DATE) 
 order by TimeToSet desc limit 1;`
 
+// struct for getting wage per hour
 type WagePerHour struct {
 	WagePerHour float64 `json:"WagePerHour"`
 }
 
-// gets the wage for a given interval, error otherwise
+// gets the wage (float) for a given interval, error otherwise
 func GetWageForCurrentInterval(ctx context.Context, db *sql.DB, EmployeeID string, ClockIn time.Time) (float64, error) {
 	//Get Shift clockInTime
 	//Get Valid Wage
@@ -39,6 +40,7 @@ func GetWageForCurrentInterval(ctx context.Context, db *sql.DB, EmployeeID strin
 }
 
 // gets database query results for wage given employee and time interval
+// returns an array of WagePerHour instances, else error
 func getQueryRes(builtQuery string, db *sql.DB) ([]WagePerHour, error) {
 	rows, err := db.Query(builtQuery)
 

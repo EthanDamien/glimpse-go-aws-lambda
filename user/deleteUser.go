@@ -23,6 +23,7 @@ type DeleteUserResponse struct {
 const deleteUserTemplate = `DELETE FROM Employees WHERE EmployeeID IN (%s);`
 
 // Delete a user from the employee table
+// returns DeleteUserResponse instance if successful, else error
 func DeleteUser(ctx context.Context, reqID string, req DeleteUserRequest, db *sql.DB) (DeleteUserResponse, error) {
 	ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(req.EmployeeIDs)), ","), "[]")
 

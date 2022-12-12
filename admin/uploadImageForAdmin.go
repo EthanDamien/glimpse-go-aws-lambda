@@ -16,6 +16,7 @@ type UploadPictureRequest struct {
 }
 
 // This method uploads the picture
+// return AdminResponse instance if successful, else error
 func UploadImageForAdmin(ctx context.Context, reqID string, req UploadPictureRequest) (AdminResponse, error) {
 	if req.AdminID == "" {
 		return AdminResponse{}, fmt.Errorf(statuscode.C500, "Missing AdminID")

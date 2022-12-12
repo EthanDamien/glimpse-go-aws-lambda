@@ -13,6 +13,7 @@ ClockOutTime <= CAST("%s" as DATE)
 )as IntervalSpecified
 group by day(ClockOutTime);`
 
+// structure for the admin table data
 type AdminTableData struct {
 	Date     string  `json:"Date"`
 	Earnings float64 `json:"Earnings"`
