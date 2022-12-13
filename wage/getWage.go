@@ -12,7 +12,7 @@ import (
 // This query will get the first wage for the current interval (where it's time to set is <= clockIn Time)
 const getWageForCurrentIntervalTemplate = `
 select WagePerHour from Wage 
-where EmployeeId = %s and TimeToSet <= CAST("%s" as DATE) 
+where EmployeeId = %s and TimeToSet <= CAST("%s" as DATETIME) 
 order by TimeToSet desc limit 1;`
 
 // struct for getting wage per hour

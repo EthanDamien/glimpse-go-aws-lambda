@@ -50,9 +50,7 @@ func UpdateShift(ctx context.Context, reqID string, req UpdateShiftRequest, db *
 		return UpdateShiftResponse{OK: false, ID: 0, ReqID: reqID}, fmt.Errorf(statuscode.C500, "ClockInTime must be earlier than ClockOutTime")
 	}
 
-	loc, _ := time.LoadLocation("EST")
-
-	var builtQuery = fmt.Sprintf(updateShiftTemplate, req.ClockInTime.In(loc), req.ClockOutTime.In(loc), req.Earnings, time.Now(), req.ShiftEventID)
+	var builtQuery = fmt.Sprintf(updateShiftTemplate, req.ClockInTime, req.ClockOutTime, req.Earnings, time.Now(), req.ShiftEventID)
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
@@ -72,7 +70,7 @@ func UpdateShiftForClockout(ctx context.Context, db *sql.DB, employeeID string, 
 		return false, err
 	}
 	//Calculate Earnings
-	now := time.Now()
+	now := time.Now().UTC()
 	earnings := GetEarnings(ClockIn, now, wagePerHour)
 	var builtQuery = fmt.Sprintf(updateShiftForClockoutTemplate, now, earnings, now, ShiftEventID)
 	_, errr := db.ExecContext(ctx, builtQuery)

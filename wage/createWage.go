@@ -37,15 +37,13 @@ func CreateWage(ctx context.Context, reqID string, req CreateWageRequest, db *sq
 		return CreateWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing TimeToSet")
 	}
 
-	loc, _ := time.LoadLocation("EST")
-
-	var builtQuery = fmt.Sprintf(createWageTemplate, req.EmployeeID, req.WagePerHour, req.TimeToSet.In(loc))
+	var builtQuery = fmt.Sprintf(createWageTemplate, req.EmployeeID, req.WagePerHour, req.TimeToSet)
 	_, err := db.ExecContext(ctx, builtQuery)
 
 	if err != nil {
 		return CreateWageResponse{OK: false}, fmt.Errorf(statuscode.C500, "Missing Password")
 	}
 
-	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %d, Wage %f, TimeToSet %s",
-		req.EmployeeID, req.WagePerHour, req.TimeToSet.In(loc)), OK: true}, nil
+	return CreateWageResponse{DESC: fmt.Sprintf("Wage Created with values EmployeeID: %d, Wage %f, TimeToSet %s UTC",
+		req.EmployeeID, req.WagePerHour, req.TimeToSet), OK: true}, nil
 }

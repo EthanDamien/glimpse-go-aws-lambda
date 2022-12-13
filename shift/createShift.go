@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 )
@@ -63,7 +64,7 @@ func GenerateShiftForClockIn(ctx context.Context, employeeID string, db *sql.DB)
 	if err != nil {
 		return err
 	}
-	var builtQuery = fmt.Sprintf(createShiftTemplateForClockIn, employeeIDAsInt, time.Now(), time.Now())
+	var builtQuery = fmt.Sprintf(createShiftTemplateForClockIn, employeeIDAsInt, time.Now().UTC(), time.Now().UTC())
 	_, errr := db.ExecContext(ctx, builtQuery)
 
 	if errr != nil {
@@ -82,18 +83,18 @@ func checkForActiveShift(ctx context.Context, employeeID string, db *sql.DB) (bo
 	res, err := getCheckShiftQueryRes(builtQuery, db)
 
 	if err != nil {
-		return false, 0, time.Now(), err
+		return false, 0, time.Now().UTC(), err
 	}
 
 	if len(res) > 1 {
-		return false, 0, time.Now(), fmt.Errorf("There's an issue here, this should never happen")
+		return false, 0, time.Now().UTC(), fmt.Errorf("There's an issue here, this should never happen")
 	}
 
 	if len(res) == 1 {
-		return true, res[0].ShiftEventID, res[0].ClockInTime, nil
+		log.Printf("Current time %s", res[0].ClockInTime.UTC())
+		return true, res[0].ShiftEventID, res[0].ClockInTime.UTC(), nil
 	}
-
-	return false, 0, time.Now(), nil
+	return false, 0, time.Now().UTC(), nil
 
 }
 
